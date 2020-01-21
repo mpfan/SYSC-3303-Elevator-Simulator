@@ -4,6 +4,7 @@
 The project designs and implements an elevator control system and simulator through Java multithreading. The system will consist of an elevator scheduler, a simulator for the elevator cars, and a simulator for floors. 
 
 ## Authors
+Group 4
 - Michael Fan
 - Derek Shao
 - Hoang Bui
