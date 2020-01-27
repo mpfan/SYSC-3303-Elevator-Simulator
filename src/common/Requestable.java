@@ -8,5 +8,5 @@ package common;
  */
 public interface Requestable {
 	
-	public void request(Message msg, Object obj);
+	public void request(Message msg, Respondable obj);
 }
