@@ -18,6 +18,7 @@ public class Scheduler implements Runnable {
 	private Queue<Message> floorMessages;
 	
 	public Scheduler() {
+		messages = new LinkedList<Message>();
 		elevatorMessages = new LinkedList<Message>();
 		floorMessages = new LinkedList<Message>();
 	}
@@ -99,6 +100,9 @@ public class Scheduler implements Runnable {
 			}
 			
 			schedule();
+			
+			elevatorMessages.notifyAll();
+			floorMessages.notifyAll();
 		}
 	}
 	
