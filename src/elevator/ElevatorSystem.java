@@ -11,7 +11,7 @@ import scheduler.Scheduler;
 
 public class ElevatorSystem implements Runnable {
 	
-	private Requestable scheduler; 
+	private Scheduler scheduler; 
 	private List<Elevator> elevators;
 	private Queue<Message> requests;
 	
