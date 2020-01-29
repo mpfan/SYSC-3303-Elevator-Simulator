@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Queue;
 
 import common.Message;
-import common.Requestable;
 import elevator.Elevator;
 import scheduler.Scheduler;
 
