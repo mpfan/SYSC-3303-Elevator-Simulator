@@ -8,66 +8,67 @@ import java.util.Queue;
 import javax.naming.spi.Resolver;
 
 import common.Message;
+import common.MessageType;
 import common.Requestable;
 import common.Respondable;
 import scheduler.Scheduler;
 
-public class ElevatorSystem implements Runnable, Respondable, Requestable {
-	
-	private Requestable scheduler; 
-	private List<Elevator> elevators;
+public class ElevatorSystem implements Runnable {
+
+	private Scheduler scheduler;
+//	private List<Elevator> elevators;
+	private Elevator ele1;
 	private Queue<Message> inBoundRequests, outBoundRequests;
-	
+
 	public ElevatorSystem(Scheduler scheduler) {
 		this.scheduler = scheduler;
-		this.elevators = new ArrayList<Elevator>();
+//		this.elevators = new ArrayList<Elevator>();
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
-		this.addElevator();
+//		this.addElevator();
+		this.ele1 = new Elevator(10, 0, this, scheduler);
 		startSystem();
 	}
-	
+
 	public void addElevator() {
-		this.elevators.add(new Elevator(10, 0, this, scheduler));
+//		this.elevators.add(new Elevator(10, 0, this, scheduler));
 //		this.elevators.add(new Elevator(10, 1, this, scheduler));
 	}
-	
+
 	public void startSystem() {
-		for (Elevator ele : this.elevators) {
-			Thread eleThread = new Thread(ele);
-			eleThread.start();
-		}
+//		for (Elevator ele : this.elevators) {
+//			Thread eleThread = new Thread(ele);
+//			eleThread.start();
+//		}
+		Thread eleThread = new Thread(this.ele1);
+		eleThread.start();
 	}
-	
+
 	@Override
 	public void run() {
-		synchronized(inBoundRequests) {
-			while (this.inBoundRequests.isEmpty()) {
+		while (true) {
+
+			this.scheduler
+					.request(new Message(MessageType.ELEVATOR, "Hello, this is an elevator system requesting work!"));
+			while (!inBoundRequests.isEmpty()) { 				// while not empty, wait for work
 				try {
-//					wait();
-					this.scheduler.request(null, this);
+					ele1.request(inBoundRequests.poll());
+					wait();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-//			this.scheduler.request(inBoundRequests.poll(), this);
+			synchronized (outBoundRequests) {
+				this.scheduler.request(outBoundRequests.poll());
+			}
 		}
 	}
 
-	@Override
-	public void response(Message msg) {
-		this.inBoundRequests.add(msg);
-	}
-
-	@Override
-	public void request(Message msg, Respondable obj) {
-		synchronized(outBoundRequests) {
-			this.scheduler.request(outBoundRequests.poll(), this);
+	public void addOutboundMessage(Message msg) {
+		synchronized (outBoundRequests) {
+			this.scheduler.request(msg);
 		}
 	}
-	
 
-	
-	
 }
