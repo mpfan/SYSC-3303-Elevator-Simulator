@@ -65,18 +65,16 @@ public class Scheduler implements Runnable {
 			}
 		} else if(messageType == MessageType.FLOOR) {
 			synchronized (floorMessages) {
-				while(floorMessages.isEmpty()) {
-					try {
-						floorMessages.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
+				if(!floorMessages.isEmpty()) {
+					messages = new LinkedList<Message>(floorMessages);
+					floorMessages.clear();
 				}
 				
-				messages = new LinkedList<Message>(floorMessages);
-				floorMessages.clear();
-				
-				floorMessages.notifyAll();
+				try {
+					Thread.sleep(5000); // temporary, we don't need this, but useful to debug
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 			}
 		}
 		
