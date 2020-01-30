@@ -1,16 +1,10 @@
 package elevator;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
-
-import javax.naming.spi.Resolver;
 
 import common.Message;
 import common.MessageType;
-import common.Requestable;
-import common.Respondable;
 import scheduler.Scheduler;
 
 public class ElevatorSystem implements Runnable {

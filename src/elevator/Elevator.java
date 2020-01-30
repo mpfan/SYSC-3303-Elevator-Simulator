@@ -1,10 +1,7 @@
 package elevator;
 
 import common.Message;
-import common.MessageType;
-import common.Respondable;
 import scheduler.Scheduler;
-import common.Requestable;
 
 public class Elevator implements Runnable {
 
