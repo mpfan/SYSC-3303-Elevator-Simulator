@@ -1,11 +1,9 @@
 package elevator;
 
 import common.Message;
-import scheduler.Scheduler;
 
 public class Elevator implements Runnable {
 
-	private Scheduler scheduler;
 	private int elevatorNumber;
 	private int capacity;
 	private int people;
@@ -16,14 +14,13 @@ public class Elevator implements Runnable {
 
 	private static final int CAPACITY = 19;
 
-	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys, Scheduler scheduler) {
+	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys) {
 		this.capacity = CAPACITY;
 		this.people = 0;
 		this.door = false;
 		this.buttonPressed = new boolean[numberOfButtons];
 		this.eleSys = eleSys;
 		this.elevatorNumber = elevatorNumber;
-		this.scheduler = scheduler;
 	}
 
 	public void receivedMessage(Message msg) {
@@ -33,35 +30,41 @@ public class Elevator implements Runnable {
 
 	@Override
 	public void run() {
-		synchronized (msg) {
-			while (true) {
-				while (msg == null) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				System.out.println("Processing message...");
-				this.eleSys.addOutboundMessage(msg);
-				this.msg = null;
-				notifyAll();
-			}
+
+		while (true) {
+			processMessage();
 		}
 	}
-
-	public void request(Message msg) {
-		synchronized (msg) {
-			while (msg != null) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+	
+	public synchronized void processMessage() {
+		while (msg == null) {
+			try {
+				System.out.println(Thread.currentThread() + " waiting to be notified");
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			this.msg = msg;
-			notifyAll();
 		}
+		System.out.println("Processing message in elevator 1...");
+		System.out.println(msg.getBody());
+		this.eleSys.addOutboundMessage(msg);
+		this.msg = null;
+		notifyAll();
+	}
+	
+	
+	public synchronized void request(Message msg) {
+
+		while (this.msg != null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println(Thread.currentThread() + " setting message  to elevator 1 with message: " + msg.getBody());
+		this.msg = msg;
+		notifyAll();
 	}
 
 	/**
