@@ -52,9 +52,10 @@ public class Scheduler implements Runnable {
 		
 		if(messageType == MessageType.ELEVATOR) {
 			synchronized (elevatorMessages) {
-				while(elevatorMessages.isEmpty()) {
+				if (elevatorMessages.isEmpty()) {
 					try {
-						elevatorMessages.wait();
+						Thread.sleep(5000); // temporary, we don't need this, but useful to debug
+						return null;
 					} catch (Exception e) {
 						// TODO: handle exception
 					}
