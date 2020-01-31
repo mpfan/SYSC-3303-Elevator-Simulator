@@ -37,18 +37,36 @@ public class ElevatorSystem implements Runnable {
 
 	@Override
 	public void run() {
+		
+		// spawn another thread for sending out-bound messages
+		Thread outBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (true) {
+					synchronized (outBoundRequests) {
+						while (outBoundRequests.isEmpty()) {
+							try {
+								outBoundRequests.wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						
+						System.out.println("Elevator System: Sending outbound messages to scheduler");
+						scheduler.request(outBoundRequests.poll());
+						outBoundRequests.notifyAll();
+					}
+				}
+			}
+		});
+		outBoundThread.start();
+		
 		while (true) {
-			while (!inBoundRequests.isEmpty() || !outBoundRequests.isEmpty()) {
+			while (!inBoundRequests.isEmpty()) {
 				while (!inBoundRequests.isEmpty()) {
 					System.out.println("Elevator System: Sending messages to free elevator");
 					ele1.request(inBoundRequests.poll());
-				}
-				
-				synchronized (outBoundRequests) {
-					while (!this.outBoundRequests.isEmpty()) {
-						System.out.println("Elevator System: Sending outbound messages to scheduler");
-						this.scheduler.request(outBoundRequests.poll());
-					}
 				}
 			}
 			
@@ -72,6 +90,7 @@ public class ElevatorSystem implements Runnable {
 		synchronized (outBoundRequests) {
 			System.out.println("Elevator System: adding outbound message to elevator system");
 			this.outBoundRequests.add(msg);
+			this.outBoundRequests.notifyAll();
 		}
 	}
 }
