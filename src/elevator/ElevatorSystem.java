@@ -62,22 +62,29 @@ public class ElevatorSystem implements Runnable {
 		});
 		outBoundThread.start();
 		
-		while (true) {
-			while (!inBoundRequests.isEmpty()) {
-				while (!inBoundRequests.isEmpty()) {
-					System.out.println("Elevator System: Sending messages to free elevator");
-					ele1.request(inBoundRequests.poll());
-				}
+		Thread inBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while(true) {
+					while (!inBoundRequests.isEmpty()) {
+						while (!inBoundRequests.isEmpty()) {
+							System.out.println("Elevator System: Sending messages to free elevator");
+							ele1.request(inBoundRequests.poll());
+						}
+					}
+					
+					System.out.println("Elevator System: Requesting messages from scheduler");
+					Queue<Message> elevatorMessages = scheduler.response(MessageType.ELEVATOR);
+					
+					if (elevatorMessages != null) {
+						inBoundRequests.addAll(elevatorMessages);
+						System.out.println("Elevator System: Received " + Integer.toString(elevatorMessages.size()) + " messages");
+					}
+				}	
 			}
-			
-			System.out.println("Elevator System: Requesting messages from scheduler");
-			Queue<Message> elevatorMessages = this.scheduler.response(MessageType.ELEVATOR);
-			
-			if (elevatorMessages != null) {
-				inBoundRequests.addAll(elevatorMessages);
-				System.out.println("Elevator System: Received " + Integer.toString(elevatorMessages.size()) + " messages");
-			}
-		}
+		});
+		inBoundThread.start();
 	}
 
 	/**
