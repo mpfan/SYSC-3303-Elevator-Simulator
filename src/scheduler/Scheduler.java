@@ -13,10 +13,15 @@ import common.MessageType;
  *
  */
 public class Scheduler implements Runnable {
+	
+	//Variables
 	private Queue<Message> messages;
 	private Queue<Message> elevatorMessages;
 	private Queue<Message> floorMessages;
 	
+	/**
+	 * Constructor for scheduler
+	 */
 	public Scheduler() {
 		messages = new LinkedList<Message>();
 		elevatorMessages = new LinkedList<Message>();
@@ -44,7 +49,6 @@ public class Scheduler implements Runnable {
 	 * Return messages of the specified type.
 	 * 
 	 * @param messageType the type of the message to return
-	 * 
 	 * @return a list of messages
 	 */
 	public Queue<Message> response(MessageType messageType) {

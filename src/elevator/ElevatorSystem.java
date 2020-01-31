@@ -15,10 +15,16 @@ import scheduler.Scheduler;
  */
 public class ElevatorSystem implements Runnable {
 
+	//Variables
 	private Scheduler scheduler;
 	private Elevator ele1;
 	private Queue<Message> inBoundRequests, outBoundRequests;
 
+	/**
+	 * Constructor for the elevator system
+	 * 
+	 * @param scheduler the scheduler
+	 */
 	public ElevatorSystem(Scheduler scheduler) {
 		this.scheduler = scheduler;
 		this.inBoundRequests = new LinkedList<Message>();
@@ -35,6 +41,9 @@ public class ElevatorSystem implements Runnable {
 		eleThread.start();
 	}
 
+	/**
+	 * Method to run
+	 */
 	@Override
 	public void run() {
 		

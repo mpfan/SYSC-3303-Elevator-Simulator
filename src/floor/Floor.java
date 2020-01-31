@@ -13,7 +13,7 @@ import scheduler.Scheduler;
  */
 public class Floor implements Runnable {
 	
-	// Variables
+	//Variables
 	Hashtable<Integer, FloorDoor> doors;
 	int people;
 	int floorNum;
