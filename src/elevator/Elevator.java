@@ -76,13 +76,17 @@ public class Elevator implements Runnable {
 	}
 
 	/**
-	 * @param capacity set the elevator's capacity
+	 * Set the elevator's capacity of the number of people
+	 * 
+	 * @param capacity The capacity of the elevator
 	 */
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
 
 	/**
+	 * Return the elevator's capacity for the number of people
+	 * 
 	 * @return the elevator's capacity
 	 */
 	public int getCapacity() {
@@ -90,13 +94,17 @@ public class Elevator implements Runnable {
 	}
 
 	/**
-	 * @param people set the amount of people in the elevator
+	 * Set the amount of people in the elevator
+	 * 
+	 * @param people The amount of people in the elevator
 	 */
 	public void setPeople(int people) {
 		this.people = people;
 	}
 
 	/**
+	 * Returns the number of people in the elevator
+	 * 
 	 * @return amount of people currently in elevator
 	 */
 	public int getPeople() {
@@ -104,41 +112,17 @@ public class Elevator implements Runnable {
 	}
 
 	/**
-	 * @param door the door to set
-	 */
-	public void setDoor(boolean door) {
-		this.door = door;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean getDoor() {
-		return door;
-	}
-
-	/**
-	 * @return the button pressed
-	 */
-	public boolean[] getButtonPressed() {
-		return buttonPressed;
-	}
-
-	/**
-	 * @param buttonPressed the button pressed to set
-	 */
-	public void setButtonPressed(boolean[] buttonPressed) {
-		this.buttonPressed = buttonPressed;
-	}
-
-	/**
-	 * @return the elevatorSystem
+	 * Return the elevator system instance
+	 * 
+	 * @return the elevatorSystem instance
 	 */
 	public ElevatorSystem getElevatorSystem() {
 		return eleSys;
 	}
 
 	/**
+	 * Set the elevator system instance
+	 * 
 	 * @param elevatorSystem the elevatorSystem to set
 	 */
 	public void setElevatorSystem(ElevatorSystem eleSys) {
@@ -146,6 +130,8 @@ public class Elevator implements Runnable {
 	}
 
 	/**
+	 * Returns the elevator number
+	 * 
 	 * @return the elevatorNumber
 	 */
 	public int getElevatorNumber() {
@@ -153,6 +139,8 @@ public class Elevator implements Runnable {
 	}
 
 	/**
+	 * Sets the elevator number
+	 * 
 	 * @param elevatorNumber the elevatorNumber to set
 	 */
 	public void setElevatorNumber(int elevatorNumber) {
