@@ -1,45 +1,150 @@
 package elevator;
 
 import common.Message;
-import common.MessageType;
-import common.Respondable;
-import common.Requestable;
 
-public class Elevator implements Respondable, Runnable {
-	
-	private Requestable scheduler; 
-	int elevatorNumber;
-	int capacity;
-	int people;
-	boolean door;
-	boolean[] buttonPressed;
-	ElevatorSystem eleSys;
-	
-	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys, Requestable scheduler) {
-		this.capacity = 0;
+/**
+ * 
+ * Class representing the Elevator class
+ * 
+ * @author Derek Shao, Souheil Yazji
+ *
+ */
+public class Elevator implements Runnable {
+
+	private int elevatorNumber; // eleavtor indentifier
+	private int capacity;
+	private int people;
+	private boolean door;
+	private boolean[] buttonPressed;
+	private ElevatorSystem eleSys;
+	private Message msg;
+
+	private static final int CAPACITY = 19;
+
+	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys) {
+		this.capacity = CAPACITY;
 		this.people = 0;
 		this.door = false;
 		this.buttonPressed = new boolean[numberOfButtons];
 		this.eleSys = eleSys;
 		this.elevatorNumber = elevatorNumber;
-		this.scheduler = scheduler;
-	}
-	
-	public void receivedMessage(Message msg) {
-		System.out.println("Elevator " + Integer.toString(elevatorNumber) + " received message:");
-		System.out.println(msg.getBody());
 	}
 
 	@Override
 	public void run() {
-		
-		this.scheduler.request(new Message(MessageType.ELEVATOR, "hi"), this);
+
+		while (true) {
+			processMessage();
+		}
+	}
+	
+	/**
+	 *  Process the message sent by elevator system
+	 */
+	public synchronized void processMessage() {
+		while (msg == null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Elevator: Processing message in elevator...");
+		System.out.println("Elevator: " + msg.getBody());
+		this.eleSys.addOutboundMessage(msg);
+		this.msg = null;
+		notifyAll();
+	}
+	
+	/**
+	 * Method for elevator to do work specified by message
+	 * 
+	 * @param msg Message with work for elevator to do
+	 */
+	public synchronized void request(Message msg) {
+
+		while (this.msg != null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Elevator: setting message  to elevator with message: " + msg.getBody());
+		this.msg = msg;
+		notifyAll();
 	}
 
-	@Override
-	public void response(Message msg) {
-		
-		receivedMessage(msg);
-		this.eleSys.addMessage(msg);
-	}	
+	/**
+	 * Set the elevator's capacity of the number of people
+	 * 
+	 * @param capacity The capacity of the elevator
+	 */
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
+
+	/**
+	 * Return the elevator's capacity for the number of people
+	 * 
+	 * @return the elevator's capacity
+	 */
+	public int getCapacity() {
+		return capacity;
+	}
+
+	/**
+	 * Set the amount of people in the elevator
+	 * 
+	 * @param people The amount of people in the elevator
+	 */
+	public void setPeople(int people) {
+		this.people = people;
+	}
+
+	/**
+	 * Returns the number of people in the elevator
+	 * 
+	 * @return amount of people currently in elevator
+	 */
+	public int getPeople() {
+		return people;
+	}
+
+	/**
+	 * Return the elevator system instance
+	 * 
+	 * @return the elevatorSystem instance
+	 */
+	public ElevatorSystem getElevatorSystem() {
+		return eleSys;
+	}
+
+	/**
+	 * Set the elevator system instance
+	 * 
+	 * @param elevatorSystem the elevatorSystem to set
+	 */
+	public void setElevatorSystem(ElevatorSystem eleSys) {
+		this.eleSys = eleSys;
+	}
+
+	/**
+	 * Returns the elevator number
+	 * 
+	 * @return the elevatorNumber
+	 */
+	public int getElevatorNumber() {
+		return elevatorNumber;
+	}
+
+	/**
+	 * Sets the elevator number
+	 * 
+	 * @param elevatorNumber the elevatorNumber to set
+	 */
+	public void setElevatorNumber(int elevatorNumber) {
+		this.elevatorNumber = elevatorNumber;
+	}
+
 }
