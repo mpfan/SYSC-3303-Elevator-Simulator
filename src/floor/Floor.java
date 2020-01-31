@@ -14,15 +14,15 @@ import scheduler.Scheduler;
 public class Floor implements Runnable {
 	
 	//Variables
-	Hashtable<Integer, FloorDoor> doors;
-	int people;
-	int floorNum;
-	FloorSystem floorSystem;
-	boolean isDownButtonPressed;
-	boolean isUpButtonPressed;
-	boolean isUpLamp; 
-	boolean isDownLamp;
-	List<Message> responses;
+	private Hashtable<Integer, FloorDoor> doors;
+	private int people;
+	private int floorNum;
+	private FloorSystem floorSystem;
+	private boolean isDownButtonPressed;
+	private boolean isUpButtonPressed;
+	private boolean isUpLamp; 
+	private boolean isDownLamp;
+	private List<Message> responses;
 	private Message msg;
 	
 		
