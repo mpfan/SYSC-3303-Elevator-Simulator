@@ -35,9 +35,9 @@ public class Scheduler implements Runnable {
 		
 		synchronized (messages) {
 			messages.add(message);
+			
+			messages.notifyAll();
 		}
-		
-		messages.notifyAll();
 	}
 	
 	/**
@@ -91,18 +91,20 @@ public class Scheduler implements Runnable {
 	 */
 	public void run() {
 		while(!messages.isEmpty()) {
-			while(messages.isEmpty()) {
-				try {
-					messages.wait();
-				} catch (Exception e) {
-					
+			synchronized (messages) {
+				while(messages.isEmpty()) {
+					try {
+						messages.wait();
+					} catch (Exception e) {
+						
+					}
 				}
+				
+				schedule();
+				
+				elevatorMessages.notifyAll();
+				floorMessages.notifyAll();
 			}
-			
-			schedule();
-			
-			elevatorMessages.notifyAll();
-			floorMessages.notifyAll();
 		}
 	}
 	
