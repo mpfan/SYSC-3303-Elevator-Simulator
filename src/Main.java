@@ -3,12 +3,33 @@ import elevator.ElevatorSystem;
 import floor.FloorSystem;
 import scheduler.Scheduler;
 
+/**
+ * Class for main to run the Elevator Control system and simulator
+ * 
+ * @author Hoang Bui
+ */
 public class Main {
 	
+	/**
+	 * Method to run the system and simulator
+	 * 
+	 * @param args filler parameter
+	 */
 	public static void main(String[] args) {
 		int numElev = 2;
+		//Create threads
+		Thread schedulerThread, eleSysThread, floorSysThread;
+		
 		Scheduler scheduler = new Scheduler();
-		ElevatorSystem eleSys = new ElevatorSystem(scheduler);
-		FloorSystem floorSys = new FloorSystem(scheduler, numElev);
+		
+		//Set up threads
+		schedulerThread = new Thread(scheduler, "scheduler");
+		eleSysThread = new Thread(new ElevatorSystem(scheduler), "eleSys");
+		floorSysThread = new Thread(new FloorSystem(scheduler, numElev), "floorSys");
+		
+		//Start the threads
+		schedulerThread.start();
+		eleSysThread.start();
+		floorSysThread.start();
 	} 
 }

@@ -20,8 +20,6 @@ public class FloorSystem implements Runnable {
 	private List<Floor> floors;
 	private Queue<Message> inBoundRequests, outBoundRequests;
 	
-	private Floor floor1;
-	
 	/**
 	* Constructor for the floor system
 	*
@@ -30,10 +28,16 @@ public class FloorSystem implements Runnable {
 	* @param inputFile the input file
 	*/
 	public FloorSystem(Scheduler scheduler, int numElev) {
+		//set-up variables
 		this.scheduler = scheduler;
+		floors = new ArrayList<Floor>();
+		outBoundRequests = new LinkedList<Message>();
+		inBoundRequests = new LinkedList<Message>();
 		
-		floor1 = new Floor(this, 1, numElev);
-
+		//Add a floor
+		addFloor(1, numElev);
+		
+		//Commented for future iterations
 //		for(int i= 0; i < 5; i++) {
 //			addFloor(i + 1, numElev);		
 //		}
@@ -62,13 +66,14 @@ public class FloorSystem implements Runnable {
 	}
 	
 	/**
-	 * Adds the message to the 
+	 * Adds the message to an outbound list
 	 *
 	 * @param msg the message to be added to the list of request
 	 */
 	public synchronized void addOutBoundMessage(Message msg) {
 		synchronized(outBoundRequests) {
 			this.outBoundRequests.add(msg);
+			this.outBoundRequests.notifyAll();
 		}
 	}
 	
@@ -110,14 +115,15 @@ public class FloorSystem implements Runnable {
 					while (!inBoundRequests.isEmpty()) {
 						while (!inBoundRequests.isEmpty()) {
 							System.out.println("Floor System: Sending messages to floor");
-							floor1.request(inBoundRequests.poll());
+							//Currently a hard coded value, but will be updated in future iterations
+							floors.get(0).request(inBoundRequests.poll());
 						}
 					}
 					
 					System.out.println("Floor System: Requesting messages from scheduler");
 					Queue<Message> floorMessages = scheduler.response(MessageType.FLOOR);
 					
-					if (floorMessages != null) {
+					if (floorMessages != null) {						
 						inBoundRequests.addAll(floorMessages);
 						System.out.println("Floor System: Received " + Integer.toString(floorMessages.size()) + " messages");
 					}
@@ -125,6 +131,15 @@ public class FloorSystem implements Runnable {
 			}
 		});
 		inBoundThread.start();
+	}
+	
+	/**
+	 * Method to obtain the number of floors
+	 * 
+	 * @return the number of floors
+	 */
+	public int numOfFloors() {
+		return floors.size();
 	}
 
 }

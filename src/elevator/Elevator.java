@@ -11,7 +11,8 @@ import common.Message;
  */
 public class Elevator implements Runnable {
 
-	private int elevatorNumber; // eleavtor indentifier
+	//Variables
+	private int elevatorNumber; // elevator identifier
 	private int capacity;
 	private int people;
 	private boolean door;
@@ -21,6 +22,13 @@ public class Elevator implements Runnable {
 
 	private static final int CAPACITY = 19;
 
+	/**
+	 * Constructor for elevator
+	 * 
+	 * @param numberOfButtons number of buttons in the elevator
+	 * @param elevatorNumber the elevator number
+	 * @param eleSys the elevator system
+	 */
 	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys) {
 		this.capacity = CAPACITY;
 		this.people = 0;
@@ -30,6 +38,9 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = elevatorNumber;
 	}
 
+	/**
+	 * Method to run
+	 */
 	@Override
 	public void run() {
 
@@ -39,7 +50,7 @@ public class Elevator implements Runnable {
 	}
 	
 	/**
-	 *  Process the message sent by elevator system
+	 *  Method to process the message sent by elevator system
 	 */
 	public synchronized void processMessage() {
 		while (msg == null) {
@@ -51,6 +62,7 @@ public class Elevator implements Runnable {
 		}
 		System.out.println("Elevator: Processing message in elevator...");
 		System.out.println("Elevator: " + msg.getBody());
+
 		this.eleSys.addOutboundMessage(msg);
 		this.msg = null;
 		notifyAll();
@@ -97,9 +109,14 @@ public class Elevator implements Runnable {
 	 * Set the amount of people in the elevator
 	 * 
 	 * @param people The amount of people in the elevator
+	 * @return true if the number of people has been changed, false otherwise
 	 */
-	public void setPeople(int people) {
+	public boolean setPeople(int people) {
+		if(people > capacity) {
+			return false;
+		}
 		this.people = people;
+		return true;
 	}
 
 	/**

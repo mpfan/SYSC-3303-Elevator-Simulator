@@ -13,10 +13,15 @@ import common.MessageType;
  *
  */
 public class Scheduler implements Runnable {
+	
+	//Variables
 	private Queue<Message> messages;
 	private Queue<Message> elevatorMessages;
 	private Queue<Message> floorMessages;
 	
+	/**
+	 * Constructor for scheduler
+	 */
 	public Scheduler() {
 		messages = new LinkedList<Message>();
 		elevatorMessages = new LinkedList<Message>();
@@ -32,10 +37,9 @@ public class Scheduler implements Runnable {
 	public void request(Message message) {
 		System.out.println("Scheduler: Message received from " + message.getType());
 		System.out.println("Scheduler: Message is: " + message.getBody());
-		
+
 		synchronized (messages) {
 			messages.add(message);
-			
 			messages.notifyAll();
 		}
 	}
@@ -44,7 +48,6 @@ public class Scheduler implements Runnable {
 	 * Return messages of the specified type.
 	 * 
 	 * @param messageType the type of the message to return
-	 * 
 	 * @return a list of messages
 	 */
 	public Queue<Message> response(MessageType messageType) {
@@ -102,8 +105,13 @@ public class Scheduler implements Runnable {
 				
 				schedule();
 				
-				elevatorMessages.notifyAll();
-				floorMessages.notifyAll();
+				synchronized(elevatorMessages) {
+					elevatorMessages.notifyAll();
+				}
+				synchronized(floorMessages) {
+					floorMessages.notifyAll();
+				}
+				
 			}
 		}
 	}
