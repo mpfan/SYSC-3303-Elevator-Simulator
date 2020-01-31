@@ -7,62 +7,71 @@ import common.Message;
 import common.MessageType;
 import scheduler.Scheduler;
 
+/**
+ * System for managing elevators and receive messages from scheduler
+ * 
+ * @author Derek Shao, Souheil Yazji
+ *
+ */
 public class ElevatorSystem implements Runnable {
 
 	private Scheduler scheduler;
-//	private List<Elevator> elevators;
 	private Elevator ele1;
 	private Queue<Message> inBoundRequests, outBoundRequests;
 
 	public ElevatorSystem(Scheduler scheduler) {
 		this.scheduler = scheduler;
-//		this.elevators = new ArrayList<Elevator>();
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
-//		this.addElevator();
-		this.ele1 = new Elevator(10, 0, this, scheduler);
+		this.ele1 = new Elevator(10, 0, this);
 		startSystem();
 	}
 
-	public void addElevator() {
-//		this.elevators.add(new Elevator(10, 0, this, scheduler));
-//		this.elevators.add(new Elevator(10, 1, this, scheduler));
-	}
-
+	/**
+	 * Start the elevators
+	 */
 	public void startSystem() {
-//		for (Elevator ele : this.elevators) {
-//			Thread eleThread = new Thread(ele);
-//			eleThread.start();
-//		}
-		Thread eleThread = new Thread(this.ele1);
+		Thread eleThread = new Thread(this.ele1, "Elevator");
 		eleThread.start();
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-
-			this.scheduler
-					.request(new Message(MessageType.ELEVATOR, "Hello, this is an elevator system requesting work!"));
-			while (!inBoundRequests.isEmpty()) { 				// while not empty, wait for work
-				try {
+			while (!inBoundRequests.isEmpty() || !outBoundRequests.isEmpty()) {
+				while (!inBoundRequests.isEmpty()) {
+					System.out.println("Elevator System: Sending messages to free elevator");
 					ele1.request(inBoundRequests.poll());
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				}
+				
+				synchronized (outBoundRequests) {
+					while (!this.outBoundRequests.isEmpty()) {
+						System.out.println("Elevator System: Sending outbound messages to scheduler");
+						this.scheduler.request(outBoundRequests.poll());
+					}
 				}
 			}
-			synchronized (outBoundRequests) {
-				this.scheduler.request(outBoundRequests.poll());
+			
+			System.out.println("Elevator System: Requesting messages from scheduler");
+			Queue<Message> elevatorMessages = this.scheduler.response(MessageType.ELEVATOR);
+			
+			if (elevatorMessages != null) {
+				inBoundRequests.addAll(elevatorMessages);
+				System.out.println("Elevator System: Received " + Integer.toString(elevatorMessages.size()) + " messages");
 			}
 		}
 	}
 
+	/**
+	 * Add a message that will need to be sent to the Scheduler
+	 * 
+	 * @param msg Message to add to be sent to the scheduler
+	 */
 	public void addOutboundMessage(Message msg) {
+
 		synchronized (outBoundRequests) {
-			this.scheduler.request(msg);
+			System.out.println("Elevator System: adding outbound message to elevator system");
+			this.outBoundRequests.add(msg);
 		}
 	}
-
 }

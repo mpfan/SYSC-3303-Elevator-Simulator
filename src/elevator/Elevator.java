@@ -1,67 +1,78 @@
 package elevator;
 
 import common.Message;
-import scheduler.Scheduler;
 
+/**
+ * 
+ * Class representing the Elevator class
+ * 
+ * @author Derek Shao, Souheil Yazji
+ *
+ */
 public class Elevator implements Runnable {
 
-	private Scheduler scheduler;
-	private int elevatorNumber;
+	private int elevatorNumber; // eleavtor indentifier
 	private int capacity;
 	private int people;
-	boolean door;
-	boolean[] buttonPressed;
+	private boolean door;
+	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
 	private Message msg;
 
 	private static final int CAPACITY = 19;
 
-	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys, Scheduler scheduler) {
+	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys) {
 		this.capacity = CAPACITY;
 		this.people = 0;
 		this.door = false;
 		this.buttonPressed = new boolean[numberOfButtons];
 		this.eleSys = eleSys;
 		this.elevatorNumber = elevatorNumber;
-		this.scheduler = scheduler;
-	}
-
-	public void receivedMessage(Message msg) {
-		System.out.println("Elevator " + Integer.toString(elevatorNumber) + " received message:");
-		System.out.println(msg.getBody());
 	}
 
 	@Override
 	public void run() {
-		synchronized (msg) {
-			while (true) {
-				while (msg == null) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				System.out.println("Processing message...");
-				this.eleSys.addOutboundMessage(msg);
-				this.msg = null;
-				notifyAll();
-			}
+
+		while (true) {
+			processMessage();
 		}
 	}
-
-	public void request(Message msg) {
-		synchronized (msg) {
-			while (msg != null) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+	
+	/**
+	 *  Process the message sent by elevator system
+	 */
+	public synchronized void processMessage() {
+		while (msg == null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			this.msg = msg;
-			notifyAll();
 		}
+		System.out.println("Elevator: Processing message in elevator...");
+		System.out.println("Elevator: " + msg.getBody());
+		this.eleSys.addOutboundMessage(msg);
+		this.msg = null;
+		notifyAll();
+	}
+	
+	/**
+	 * Method for elevator to do work specified by message
+	 * 
+	 * @param msg Message with work for elevator to do
+	 */
+	public synchronized void request(Message msg) {
+
+		while (this.msg != null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Elevator: setting message  to elevator with message: " + msg.getBody());
+		this.msg = msg;
+		notifyAll();
 	}
 
 	/**
