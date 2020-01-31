@@ -52,29 +52,33 @@ public class Scheduler implements Runnable {
 		
 		if(messageType == MessageType.ELEVATOR) {
 			synchronized (elevatorMessages) {
-				if(!elevatorMessages.isEmpty()) {
-					messages = new LinkedList<Message>(elevatorMessages);
-					elevatorMessages.clear();
+				while(elevatorMessages.isEmpty()) {
+					try {
+						elevatorMessages.wait();
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
 				}
 				
-				try {
-					Thread.sleep(5000); // temporary, we don't need this, but useful to debug
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
+				messages = new LinkedList<Message>(elevatorMessages);
+				elevatorMessages.clear();
+				
+				elevatorMessages.notifyAll();
 			}
 		} else if(messageType == MessageType.FLOOR) {
 			synchronized (floorMessages) {
-				if(!floorMessages.isEmpty()) {
-					messages = new LinkedList<Message>(floorMessages);
-					floorMessages.clear();
+				while(floorMessages.isEmpty()) {
+					try {
+						floorMessages.wait();
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
 				}
 				
-				try {
-					Thread.sleep(5000); // temporary, we don't need this, but useful to debug
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
+				messages = new LinkedList<Message>(floorMessages);
+				floorMessages.clear();
+				
+				floorMessages.notifyAll();
 			}
 		}
 		
