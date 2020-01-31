@@ -90,7 +90,7 @@ public class Scheduler implements Runnable {
 	 * is no requests.
 	 */
 	public void run() {
-		while(!messages.isEmpty()) {
+		while(true) {
 			synchronized (messages) {
 				while(messages.isEmpty()) {
 					try {
