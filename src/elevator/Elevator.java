@@ -62,6 +62,7 @@ public class Elevator implements Runnable {
 		}
 		System.out.println("Elevator: Processing message in elevator...");
 		System.out.println("Elevator: " + msg.getBody());
+
 		this.eleSys.addOutboundMessage(msg);
 		this.msg = null;
 		notifyAll();
@@ -108,9 +109,14 @@ public class Elevator implements Runnable {
 	 * Set the amount of people in the elevator
 	 * 
 	 * @param people The amount of people in the elevator
+	 * @return true if the number of people has been changed, false otherwise
 	 */
-	public void setPeople(int people) {
+	public boolean setPeople(int people) {
+		if(people > capacity) {
+			return false;
+		}
 		this.people = people;
+		return true;
 	}
 
 	/**

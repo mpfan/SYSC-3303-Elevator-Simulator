@@ -7,7 +7,7 @@ package floor;
 */
 public class FloorDoor {
 	// Variable
-	boolean isOpen;
+	private boolean isOpen;
 	
 	/**
 	* Constructor for a floor door
@@ -19,9 +19,15 @@ public class FloorDoor {
 	/**
 	* Method to open the door
 	*
-	* @return true when the door has opened
+	* @return true when the door has opened, false otherwise
 	*/
 	public boolean openDoor() {
+		//Check if the door is already open
+		if(isOpen) {
+			return false;
+		}
+		
+		//Open the door
 		isOpen = true;
 		return isOpen;
 	}
@@ -29,11 +35,17 @@ public class FloorDoor {
 	/**
 	* Method to close the door
 	*
-	* @return false when the door has closed
+	* @return true when the door has closed, false otherwise
 	*/
 	public boolean closeDoor() {
+		//Check if the door is already closed
+		if(isOpen == false) {
+			return false;
+		}
+		
+		//Close the door
 		isOpen = false;
-		return isOpen;
+		return true;
 	}
 	
 }

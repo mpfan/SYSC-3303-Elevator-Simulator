@@ -37,10 +37,9 @@ public class Scheduler implements Runnable {
 	public void request(Message message) {
 		System.out.println("Scheduler: Message received from " + message.getType());
 		System.out.println("Scheduler: Message is: " + message.getBody());
-		
+
 		synchronized (messages) {
 			messages.add(message);
-			
 			messages.notifyAll();
 		}
 	}
@@ -106,8 +105,13 @@ public class Scheduler implements Runnable {
 				
 				schedule();
 				
-				elevatorMessages.notifyAll();
-				floorMessages.notifyAll();
+				synchronized(elevatorMessages) {
+					elevatorMessages.notifyAll();
+				}
+				synchronized(floorMessages) {
+					floorMessages.notifyAll();
+				}
+				
 			}
 		}
 	}

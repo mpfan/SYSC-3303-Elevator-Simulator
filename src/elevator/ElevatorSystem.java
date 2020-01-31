@@ -109,4 +109,14 @@ public class ElevatorSystem implements Runnable {
 			this.outBoundRequests.notifyAll();
 		}
 	}
+	
+	/**
+	 * Method to obtain the number of elevators in the system
+	 * 
+	 * @return number of elevators
+	 */
+	public int getNumElevators() {
+		//Currently just one elevator, will be updated for future iterations
+		return 1;
+	}
 }

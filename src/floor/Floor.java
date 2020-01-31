@@ -45,7 +45,7 @@ public class Floor implements Runnable {
 		
 		//create the doors 
 		doors = new Hashtable<Integer, FloorDoor>();
-		for(int i = 1; i < numElev; i++) {
+		for(int i = 1; i < numElev + 1; i++) {
 			doors.put(i, new FloorDoor());
 		}
 	}
@@ -134,6 +134,42 @@ public class Floor implements Runnable {
 		}
 		
 		return inputs;
+	}
+
+	/**
+	 * Method to obtain the number of doors
+	 * 
+	 * @return the number of doors
+	 */
+	public int numOfDoors() {
+		return doors.size();
+	}
+
+	/**
+	 * Method to obtain the number of people on the floor
+	 * 
+	 * @return the number of people
+	 */
+	public int getPeople() {
+		return people;
+	}
+
+	/**
+	 * Method to set the number of people on the floor
+	 * 
+	 * @param people the number people to set
+	 */
+	public void setPeople(int people) {
+		this.people = people;
+	}
+
+	/**
+	 * Method to obtain the floor number
+	 * 
+	 * @return floorNum the floor number
+	 */
+	public int getFloorNum() {
+		return floorNum;
 	}
 	
 }

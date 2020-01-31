@@ -73,6 +73,7 @@ public class FloorSystem implements Runnable {
 	public synchronized void addOutBoundMessage(Message msg) {
 		synchronized(outBoundRequests) {
 			this.outBoundRequests.add(msg);
+			this.outBoundRequests.notifyAll();
 		}
 	}
 	
@@ -130,6 +131,15 @@ public class FloorSystem implements Runnable {
 			}
 		});
 		inBoundThread.start();
+	}
+	
+	/**
+	 * Method to obtain the number of floors
+	 * 
+	 * @return the number of floors
+	 */
+	public int numOfFloors() {
+		return floors.size();
 	}
 
 }
