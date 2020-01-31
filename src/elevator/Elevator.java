@@ -2,13 +2,20 @@ package elevator;
 
 import common.Message;
 
+/**
+ * 
+ * Class representing the Elevator class
+ * 
+ * @author Derek Shao, Souheil Yazji
+ *
+ */
 public class Elevator implements Runnable {
 
-	private int elevatorNumber;
+	private int elevatorNumber; // eleavtor indentifier
 	private int capacity;
 	private int people;
-	boolean door;
-	boolean[] buttonPressed;
+	private boolean door;
+	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
 	private Message msg;
 
@@ -23,11 +30,6 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = elevatorNumber;
 	}
 
-	public void receivedMessage(Message msg) {
-		System.out.println("Elevator " + Integer.toString(elevatorNumber) + " received message:");
-		System.out.println(msg.getBody());
-	}
-
 	@Override
 	public void run() {
 
@@ -36,23 +38,29 @@ public class Elevator implements Runnable {
 		}
 	}
 	
+	/**
+	 *  Process the message sent by elevator system
+	 */
 	public synchronized void processMessage() {
 		while (msg == null) {
 			try {
-				System.out.println(Thread.currentThread() + " waiting to be notified");
 				wait();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Processing message in elevator 1...");
-		System.out.println(msg.getBody());
+		System.out.println("Elevator: Processing message in elevator...");
+		System.out.println("Elevator: " + msg.getBody());
 		this.eleSys.addOutboundMessage(msg);
 		this.msg = null;
 		notifyAll();
 	}
 	
-	
+	/**
+	 * Method for elevator to do work specified by message
+	 * 
+	 * @param msg Message with work for elevator to do
+	 */
 	public synchronized void request(Message msg) {
 
 		while (this.msg != null) {
@@ -62,7 +70,7 @@ public class Elevator implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(Thread.currentThread() + " setting message  to elevator 1 with message: " + msg.getBody());
+		System.out.println("Elevator: setting message  to elevator with message: " + msg.getBody());
 		this.msg = msg;
 		notifyAll();
 	}
