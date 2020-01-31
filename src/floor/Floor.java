@@ -1,5 +1,7 @@
 package floor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import common.*;
 import scheduler.Scheduler;
@@ -12,7 +14,6 @@ import scheduler.Scheduler;
 public class Floor implements Runnable {
 	
 	// Variables
-	private Scheduler scheduler;
 	Hashtable<Integer, FloorDoor> doors;
 	int people;
 	int floorNum;
@@ -22,6 +23,7 @@ public class Floor implements Runnable {
 	boolean isUpLamp; 
 	boolean isDownLamp;
 	List<Message> responses;
+	private Message msg;
 	
 		
 	/**
@@ -32,9 +34,8 @@ public class Floor implements Runnable {
 	 * @param floorNum The current floor number
 	 * @param numElev The number of elevators
 	 */
-	public Floor(FloorSystem floorSys, Scheduler scheduler, int floorNum, int numElev) {
+	public Floor(FloorSystem floorSys, int floorNum, int numElev) {
 		this.floorSystem = floorSys;
-		this.scheduler = scheduler;
 		this.floorNum = floorNum;
 		this.people = 0;
 		this.isDownButtonPressed = false;
@@ -50,35 +51,89 @@ public class Floor implements Runnable {
 	}
 
 	/**
-	* Method to receive message from floor system
-	*
-	* @param msg Message received from floor system
-	*/
-	public void receivedMessage(Message msg) {
-		System.out.println("Floor " + Integer.toString(floorNum) + " received message:");
-		System.out.println(msg.getBody());
-	}
-
-	/**
 	* Method to run commands
 	*/
 	@Override
 	public void run() {
-		//When elevator has arrived
-		//this.floorSystem.addMessage(new Message(MessageType.ELEVATOR, "oi"));	
 		
-		// 
+		String inputFile = "./src/floor/input.txt";
+		List<String> inputs = readFile(inputFile);
+		
+		String message = "";
+		for(String line : inputs) {
+			message = message + line + "\n";
+		}
+		
+		this.msg = new Message(MessageType.FLOOR,message);
+		
+		while(true) {
+			processMessage();
+		}
 	}
-
-	/**
-	* Method to respond back to a message
-	*
-	* @param msg Message received
-	*/
-	public void response(Message msg) {
 		
-		receivedMessage(msg);
-		this.floorSystem.addMessage(msg);
+	
+	/**
+	 *  Process the message to floor system
+	 */
+	public synchronized void processMessage() {
+		while (msg == null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Floor: Processing message on floor...");
+		System.out.println("Floor: " + msg.getBody());
+		this.floorSystem.addOutBoundMessage(msg);
+		this.msg = null;
+		notifyAll();
+	}
+	
+	/**
+	 * Method for floor to do work specified by message
+	 * 
+	 * @param msg Message with work for elevator to do
+	 */
+	public synchronized void request(Message msg) {
+
+		while (this.msg != null) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Floor: setting message  to floor with message: " + msg.getBody());
+		this.msg = msg;
+		notifyAll();
+	}
+	
+
+
+	
+	/**
+	 * Reads the file and adds each line to the list
+	 *
+	 * @param inputFile The name of the file to be read
+	 * @return The list of inputs
+	 */
+	private List<String> readFile(String inputFile) {
+		
+		ArrayList<String> inputs = new ArrayList<String>();
+		
+		try {
+			Scanner scanner = new Scanner(new File(inputFile));
+			
+			while(scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				inputs.add(line);
+			}	
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		return inputs;
 	}
 	
 }
