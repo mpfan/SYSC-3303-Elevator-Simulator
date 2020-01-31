@@ -14,12 +14,19 @@ import scheduler.Scheduler;
  */
 public class FloorSystem implements Runnable {
 	
+	// Variables
 	private Scheduler scheduler; 
 	private List<Floor> floors;
 	private Queue<Message> requests;
 	private List<String> inputs;
 	
-	
+	/**
+	* Constructor for the floor system
+	*
+	* @param scheduler the scheduler
+	* @param numElev the number of elevators
+	* @param inputFile the input file
+	*/
 	public FloorSystem(Scheduler scheduler, int numElev, String inputFile) {
 		this.scheduler = scheduler;
 		this.inputs = readFile(inputFile);
@@ -54,7 +61,8 @@ public class FloorSystem implements Runnable {
 	
 	/**
 	 * Adds the message to the 
-	 * @param msg
+	 *
+	 * @param msg the message to be added to the list of request
 	 */
 	public synchronized void addMessage(Message msg) {
 		synchronized(requests) {
@@ -64,8 +72,8 @@ public class FloorSystem implements Runnable {
 	
 	/**
 	 * Reads the file and adds each line to the list
+	 *
 	 * @param inputFile The name of the file to be read
-	 * 
 	 * @return The list of inputs
 	 */
 	private List<String> readFile(String inputFile) {
@@ -87,6 +95,9 @@ public class FloorSystem implements Runnable {
 	}
 
 
+	/**
+	* Method to run commands
+	*/
 	@Override
 	public void run() {
 		synchronized(requests) {
