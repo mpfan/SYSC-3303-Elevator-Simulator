@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import common.Message;
+import common.MessageType;
 import scheduler.Scheduler;
 
 /**
@@ -17,8 +18,9 @@ public class FloorSystem implements Runnable {
 	// Variables
 	private Scheduler scheduler; 
 	private List<Floor> floors;
-	private Queue<Message> requests;
-	private List<String> inputs;
+	private Queue<Message> inBoundRequests, outBoundRequests;
+	
+	private Floor floor1;
 	
 	/**
 	* Constructor for the floor system
@@ -27,14 +29,14 @@ public class FloorSystem implements Runnable {
 	* @param numElev the number of elevators
 	* @param inputFile the input file
 	*/
-	public FloorSystem(Scheduler scheduler, int numElev, String inputFile) {
+	public FloorSystem(Scheduler scheduler, int numElev) {
 		this.scheduler = scheduler;
-		this.inputs = readFile(inputFile);
 		
-		//Create 5 floors
-		for(int i= 0; i < 5; i++) {
-			addFloor(i + 1, numElev);		
-		}
+		floor1 = new Floor(this, 1, numElev);
+
+//		for(int i= 0; i < 5; i++) {
+//			addFloor(i + 1, numElev);		
+//		}
 		
 		startSystem();
 	}
@@ -46,7 +48,7 @@ public class FloorSystem implements Runnable {
 	 * @param numElev The amount of elevators on the floor
 	 */
 	private void addFloor(int floorNum, int numElev) {
-		this.floors.add(new Floor(this, scheduler, floorNum, numElev));
+		this.floors.add(new Floor(this, floorNum, numElev));
 	}
 	
 	/**
@@ -64,51 +66,65 @@ public class FloorSystem implements Runnable {
 	 *
 	 * @param msg the message to be added to the list of request
 	 */
-	public synchronized void addMessage(Message msg) {
-		synchronized(requests) {
-			this.requests.add(msg);
+	public synchronized void addOutBoundMessage(Message msg) {
+		synchronized(outBoundRequests) {
+			this.outBoundRequests.add(msg);
 		}
 	}
 	
-	/**
-	 * Reads the file and adds each line to the list
-	 *
-	 * @param inputFile The name of the file to be read
-	 * @return The list of inputs
-	 */
-	private List<String> readFile(String inputFile) {
-		
-		ArrayList<String> inputs = new ArrayList<String>();
-		
-		try {
-			Scanner scanner = new Scanner(new File(inputFile));
-			
-			while(scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				inputs.add(line);
-			}	
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return inputs;
-	}
 
-
-	/**
-	* Method to run commands
-	*/
 	@Override
 	public void run() {
-		synchronized(requests) {
-			while (this.requests.isEmpty()) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		
+		// spawn another thread for sending out-bound messages to scheduler
+		Thread outBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (true) {
+					synchronized (outBoundRequests) {
+						while (outBoundRequests.isEmpty()) {
+							try {
+								outBoundRequests.wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						
+						System.out.println("Floor System: Sending outbound messages to scheduler");
+						scheduler.request(outBoundRequests.poll());
+						outBoundRequests.notifyAll();
+					}
 				}
 			}
-		}
-	} 
+		});
+		
+		outBoundThread.start();
+		
+		// Thread for receiving in-bound messages from scheduler
+		Thread inBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while(true) {
+					while (!inBoundRequests.isEmpty()) {
+						while (!inBoundRequests.isEmpty()) {
+							System.out.println("Floor System: Sending messages to floor");
+							floor1.request(inBoundRequests.poll());
+						}
+					}
+					
+					System.out.println("Floor System: Requesting messages from scheduler");
+					Queue<Message> floorMessages = scheduler.response(MessageType.FLOOR);
+					
+					if (floorMessages != null) {
+						inBoundRequests.addAll(floorMessages);
+						System.out.println("Floor System: Received " + Integer.toString(floorMessages.size()) + " messages");
+					}
+				}	
+			}
+		});
+		inBoundThread.start();
+	}
 
 }

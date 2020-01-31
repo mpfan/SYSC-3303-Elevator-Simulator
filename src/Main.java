@@ -7,9 +7,8 @@ public class Main {
 	
 	public static void main(String[] args) {
 		int numElev = 2;
-		String inputFile = "./src/floor/input.txt";
 		Scheduler scheduler = new Scheduler();
 		ElevatorSystem eleSys = new ElevatorSystem(scheduler);
-		FloorSystem floorSys = new FloorSystem(scheduler, numElev, inputFile);
+		FloorSystem floorSys = new FloorSystem(scheduler, numElev);
 	} 
 }
