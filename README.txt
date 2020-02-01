@@ -3,7 +3,7 @@ SYSC3303 Project Group 4
 About
 The project designs and implements an elevator control system and simulator through Java multithreading. The system will consist of an elevator scheduler, a simulator for the elevator cars, and a simulator for floors. 
 
-Group 4 Members
+Members of Group 4:
 - Michael Fan
 - Derek Shao
 - Hoang Bui
@@ -66,6 +66,10 @@ BREAKDOWN OF RESPONSIBILITIES
 - Elevator System
     - Derek Shao
     - Souheil Yazji
+
+- Floor System
+    - Christophe Tran
+    - Hoang Bui
 
 - Unit tests
     - Everyone
