@@ -24,6 +24,7 @@ public class Floor implements Runnable {
 	private boolean isDownLamp;
 	private List<Message> responses;
 	private Message msg;
+	private ArrayList<String> messages;
 	
 		
 	/**
@@ -42,6 +43,7 @@ public class Floor implements Runnable {
 		this.isUpButtonPressed = false;
 		this.isUpLamp = false;
 		this.isDownLamp = false;
+		this.messages = new ArrayList<String>();
 		
 		//create the doors 
 		doors = new Hashtable<Integer, FloorDoor>();
@@ -58,14 +60,18 @@ public class Floor implements Runnable {
 		
 		String inputFile = "./src/floor/input.txt";
 		List<String> inputs = readFile(inputFile);
+		List<Long> timeStamps = new ArrayList<Long>();
 		
-		String message = "";
 		for(String line : inputs) {
-			message = message + line + "\n";
+			if(line.trim().isEmpty()) {
+				continue;
+			}
+			messages.add(line + '\n');
+			timeStamps.add(System.currentTimeMillis() + (long) 100 * messages.size());
 		}
 		
-		this.msg = new Message(MessageType.FLOOR,message);
-		
+		msg = new Message(MessageType.FLOOR,messages.get(0));
+		messages.remove(0);
 		while(true) {
 			processMessage();
 		}
@@ -83,16 +89,24 @@ public class Floor implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		
+		//Check if message type is floor
 		if(msg.getType().equals(MessageType.FLOOR)) {
 			System.out.println("Floor: Processing message on floor...");
 			System.out.println("Floor: " + msg.getBody());
 			this.floorSystem.addOutBoundMessage(msg);
 			this.msg = null;
 		}
-		else {
+		else { //Message type is elevator
 			System.out.println("Floor: Processing message received from elevator...");
 			System.out.println("Floor: " + msg.getBody());
-			this.msg = null;
+			if(messages.size() > 0){ //Check if there are still more inputs
+				this.msg = new Message(MessageType.FLOOR,messages.get(0));
+				messages.remove(0);
+			}
+			else {
+				this.msg = null;
+			}
 		}
 		notifyAll();
 	}
