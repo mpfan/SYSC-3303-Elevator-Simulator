@@ -141,5 +141,27 @@ public class FloorSystem implements Runnable {
 	public int numOfFloors() {
 		return floors.size();
 	}
-
+	
+	/**
+	 * Returns the list of floors
+	 * 
+	 * @return All the floor objects
+	 */
+	public List<Floor> getFloors() {
+		return floors;
+	}
+	
+	/**
+	 * Returns outBoundRequests, which contains the list of messages to be sent to Scheduler
+	 * 
+	 * @return list of messages to be sent to scheduler
+	 */
+	public Queue<Message> getOutBoundRequests() {
+		return outBoundRequests;
+	}
+	
+	public Queue<Message> getInBoundRequests(){
+		return inBoundRequests;
+	}
+ 
 }
