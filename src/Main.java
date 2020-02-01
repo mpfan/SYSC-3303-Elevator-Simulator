@@ -1,4 +1,3 @@
-import elevator.Elevator;
 import elevator.ElevatorSystem;
 import floor.FloorSystem;
 import scheduler.Scheduler;
