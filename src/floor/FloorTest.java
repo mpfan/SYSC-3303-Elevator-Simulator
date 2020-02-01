@@ -4,17 +4,21 @@
 package floor;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import common.Message;
+import common.MessageType;
 import scheduler.Scheduler;
 
 /**
  * Class to run tests on all Floor related classes
  * 
- * @author Hoang Bui
+ * @author Hoang Bui, Christophe Tan
  */
 class FloorTest {
 
@@ -38,6 +42,19 @@ class FloorTest {
 		assertTrue("Check that the number people on the floor is 5", floor.getPeople() == 5);
 	}
 	
+	void floorSystemMessageTest() {
+		FloorSystem floorSystem = new FloorSystem(new Scheduler(), 1);
+		Floor floor = floorSystem.getFloors().get(0);
+		assertNull("Floor should currently contain no message", floor.getMessage());
+		floor.request(new Message(MessageType.FLOOR, "Message from floor"));
+		assertNotNull("Floor should now contain a message to be sent", floor.getMessage());
+		assertTrue("Floor system should currently have no outbound messages",floorSystem.getOutBoundRequests().size() == 0);
+		floor.processMessage();
+		assertNull("Floor should have sent message", floor.getMessage());
+		assertTrue("Floor system should have recieved message from floor", floorSystem.getOutBoundRequests().size() == 1);
+
+	}
+	
 	/**
 	 * Method to test the floorDoor class
 	 */
@@ -57,6 +74,7 @@ class FloorTest {
 		floorSystemTest();
 		floorTest();
 		floorDoorTest();
+		floorSystemMessageTest();
 	}
 
 }

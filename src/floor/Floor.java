@@ -131,8 +131,6 @@ public class Floor implements Runnable {
 	}
 	
 
-
-	
 	/**
 	 * Reads the file and adds each line to the list
 	 *
@@ -191,6 +189,25 @@ public class Floor implements Runnable {
 	 */
 	public int getFloorNum() {
 		return floorNum;
+	}
+	
+	
+	/**
+	 * Get the message of the floor
+	 * 
+	 * @return the message stored on floor
+	 */
+	public Message getMessage() {
+		return msg;
+	}
+	
+	/**
+	 * Get the list of messages stored on this floor
+	 * 
+	 * @return messages stored on this floor
+	 */
+	public ArrayList<String> getMessages() {
+		return messages;
 	}
 	
 }
