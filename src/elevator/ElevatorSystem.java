@@ -30,13 +30,12 @@ public class ElevatorSystem implements Runnable {
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
 		this.ele1 = new Elevator(10, 0, this);
-		startSystem();
 	}
 
 	/**
 	 * Start the elevators
 	 */
-	public void startSystem() {
+	public void startElevators() {
 		Thread eleThread = new Thread(this.ele1, "Elevator");
 		eleThread.start();
 	}
@@ -46,6 +45,8 @@ public class ElevatorSystem implements Runnable {
 	 */
 	@Override
 	public void run() {
+
+		startElevators();
 		
 		// spawn another thread for sending out-bound messages
 		Thread outBoundThread = new Thread(new Runnable() {
@@ -77,11 +78,10 @@ public class ElevatorSystem implements Runnable {
 			public void run() {
 				while(true) {
 					while (!inBoundRequests.isEmpty()) {
-						while (!inBoundRequests.isEmpty()) {
-							System.out.println("Elevator System: Sending messages to free elevator");
-							ele1.request(inBoundRequests.poll());
-						}
+						System.out.println("Elevator System: Sending messages to free elevator");
+						ele1.request(inBoundRequests.poll());
 					}
+
 					
 					System.out.println("Elevator System: Requesting messages from scheduler");
 					Queue<Message> elevatorMessages = scheduler.response(MessageType.ELEVATOR);
@@ -108,6 +108,26 @@ public class ElevatorSystem implements Runnable {
 			this.outBoundRequests.add(msg);
 			this.outBoundRequests.notifyAll();
 		}
+	}
+	
+	/**
+	 * Size of elevator system in-bound messages queue
+	 * 
+	 * @return in-bound messages queue size
+	 */
+	public int getInBoundMessagesStored() {
+		
+		return this.inBoundRequests.size();
+	}
+	
+	/**
+	 * Size of elevator system out-bound messages queue
+	 * 
+	 * @return out-bound messages queue size
+	 */
+	public int getOutBoundMessagesStored() {
+		
+		return this.outBoundRequests.size();
 	}
 	
 	/**
