@@ -56,3 +56,12 @@ Unit tests could be found in files MessageTest.java, ElevatorTest.java, FloorTes
 
 BREAKDOWN OF RESPONSIBILITIES
 
+- Elevator System
+    - Derek Shao
+    - Souheil Yazji
+
+- UML Class Diagram
+    - Everyone
+
+- UML Sequence Diagram
+    - Everyone
