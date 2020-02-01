@@ -87,6 +87,16 @@ public class Elevator implements Runnable {
 		this.msg = msg;
 		notifyAll();
 	}
+	
+	/**
+	 * Get the message currently stored in elevator
+	 * 
+	 * @return messaged stored in elevator
+	 */
+	public Message getMessage() {
+		
+		return msg;
+	}
 
 	/**
 	 * Set the elevator's capacity of the number of people
