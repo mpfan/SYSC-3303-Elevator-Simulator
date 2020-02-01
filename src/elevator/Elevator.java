@@ -1,6 +1,7 @@
 package elevator;
 
 import common.Message;
+import common.MessageType;
 
 /**
  * 
@@ -62,7 +63,7 @@ public class Elevator implements Runnable {
 		}
 		System.out.println("Elevator: Processing message in elevator...");
 		System.out.println("Elevator: " + msg.getBody());
-
+		msg.setType(MessageType.ELEVATOR);
 		this.eleSys.addOutboundMessage(msg);
 		this.msg = null;
 		notifyAll();

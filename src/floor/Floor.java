@@ -83,10 +83,17 @@ public class Floor implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Floor: Processing message on floor...");
-		System.out.println("Floor: " + msg.getBody());
-		this.floorSystem.addOutBoundMessage(msg);
-		this.msg = null;
+		if(msg.getType().equals(MessageType.FLOOR)) {
+			System.out.println("Floor: Processing message on floor...");
+			System.out.println("Floor: " + msg.getBody());
+			this.floorSystem.addOutBoundMessage(msg);
+			this.msg = null;
+		}
+		else {
+			System.out.println("Floor: Processing message received from elevator...");
+			System.out.println("Floor: " + msg.getBody());
+			this.msg = null;
+		}
 		notifyAll();
 	}
 	
