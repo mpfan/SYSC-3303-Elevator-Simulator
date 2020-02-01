@@ -20,6 +20,10 @@ Common Package
 - MessageType.java
     - enum class for specifying the type of message - could be a ELEVATOR or FLOOR message
 
+Scheduler Package
+- Scheduler.Java
+    - class used to coordinate elevators and floors
+
 Elevator Package
 
 - Elevator.java
@@ -56,9 +60,15 @@ Unit tests could be found in files MessageTest.java, ElevatorTest.java, FloorTes
 
 BREAKDOWN OF RESPONSIBILITIES
 
+- Scheduler
+    - Michael Fan
+
 - Elevator System
     - Derek Shao
     - Souheil Yazji
+
+- Unit tests
+    - Everyone
 
 - UML Class Diagram
     - Everyone
