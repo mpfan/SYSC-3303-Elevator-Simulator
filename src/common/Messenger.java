@@ -36,7 +36,7 @@ public class Messenger {
 	 */
 	public static Messenger getMessenger() {
 		if(messenger == null) {
-			return new Messenger();
+			messenger = new Messenger();
 		}
 		
 		return messenger;
@@ -112,7 +112,7 @@ public class Messenger {
 		try {
 			socket = new DatagramSocket();
 			
-			byte[] msg = serailizeObject(message);
+			byte[] msg = serializeObject(message);
 			
 			DatagramPacket packet = new DatagramPacket(msg, msg.length, address, port);
 			
@@ -179,7 +179,7 @@ public class Messenger {
 	 * 
 	 * @return the byte array representation of the specified object
 	 */
-	private byte[] serailizeObject(Object object) {
+	private byte[] serializeObject(Object object) {
 		ByteArrayOutputStream in = new ByteArrayOutputStream();
 		ObjectOutputStream out = null;
 		byte[] result = null;
