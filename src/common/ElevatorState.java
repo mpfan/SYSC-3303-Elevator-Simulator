@@ -3,7 +3,7 @@ package common;
 /**
  * A enum class for the elevator states
  * 
- * @author Hoang
+ * @author Hoang, Derek Shao
  */
 public enum ElevatorState {
 
@@ -11,10 +11,8 @@ public enum ElevatorState {
 		@Override
 		public ElevatorState next(Transition transition) {
 			if (transition == Transition.RECEIVEDMESSAGE_UP) {
-
 				return MOVINGUP;
 			} else if (transition == Transition.RECEIVEDMESSAGE_DOWN) {
-
 				return MOVINGDOWN;
 			}
 			return ILLEGAL;
@@ -51,9 +49,8 @@ public enum ElevatorState {
 		@Override
 		public ElevatorState next(Transition transition) {
 			if (transition == Transition.PRESS_UP) {
-				return MOVINGUP; // Remember to add the other return for MOVINGDOWN
+				return MOVINGUP;
 			} else if (transition == Transition.PRESS_DOWN) {
-
 				return MOVINGDOWN;
 			}
 			return ILLEGAL;
@@ -70,7 +67,7 @@ public enum ElevatorState {
 	public abstract ElevatorState next(Transition transition);
 
 	/**
-	 * Transitions
+	 * Transitions to change states
 	 *
 	 */
 	public static enum Transition {
