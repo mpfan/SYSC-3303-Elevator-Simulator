@@ -1,9 +1,6 @@
 package elevator;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Calendar;
 
 import common.FloorMessage;
@@ -158,6 +155,12 @@ public class Elevator implements Runnable {
 
 		System.out.println("Elevator message direction: " + receivedMsg.getDirection());
 
+		if (receivedMsg.getDirection().equalsIgnoreCase("UP")) {
+			this.mode = ElevatorMode.UP;
+		} else if (receivedMsg.getDirection().equalsIgnoreCase("DOWN")) {
+			this.mode = ElevatorMode.DOWN;
+		}
+		
 		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
 			this.state.onNext(Transition.LOAD);
 		} else if (state.getCurrentState() == ElevatorState.IDLE) {
