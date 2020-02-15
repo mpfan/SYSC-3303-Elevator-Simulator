@@ -1,5 +1,7 @@
 package elevator;
 
+import java.util.Set;
+
 import common.Message;
 import common.MessageType;
 
@@ -20,6 +22,7 @@ public class Elevator implements Runnable {
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
 	private Message msg;
+	private Set<Integer> destination;
 
 	private static final int CAPACITY = 19;
 
@@ -174,5 +177,16 @@ public class Elevator implements Runnable {
 	public void setElevatorNumber(int elevatorNumber) {
 		this.elevatorNumber = elevatorNumber;
 	}
+
+
+	/**
+	 * Add destination to elevator's Set of destination floors
+	 * @param destination
+	 */
+	public void addDestination(Integer destination) {
+		this.destination.add(destination);
+	}
+	
+	
 
 }
