@@ -74,9 +74,15 @@ public class Elevator implements Runnable {
 
 				while (true) {
 
-					Transition transition = getElevatorDirection();
-
 					ElevatorState currentState = state.getCurrentState();
+					
+					Transition transition = getElevatorDirection();
+					
+					if (currentState == ElevatorState.DOORCLOSE) {
+						if (mode.canMoveToFloor(currFloor, currDest, currentState)) {
+							transition = mode == ElevatorMode.UP ? Transition.PRESS_UP : Transition.PRESS_DOWN;
+						}
+					}
 
 					if (transition != null) {
 						state.onNext(transition);
@@ -93,18 +99,14 @@ public class Elevator implements Runnable {
 					if (state.getCurrentState() == ElevatorState.DOOROPEN) {
 						door = true;
 					} else if (state.getCurrentState() == ElevatorState.DOORCLOSE) {
-
 						door = false;
-					} else if (state.getCurrentState() == ElevatorState.IDLE) {
-
 					}
 
 					if (currentState == nextState && (currentState == ElevatorState.IDLE
 							|| currentState == ElevatorState.DOOROPEN || currentState == ElevatorState.DOORCLOSE)) {
-						System.out.println("Elevator: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ skipping @@@@@@@@@@@@@@@@@@@@@");
 						
 						try {
-							Thread.sleep(4700);
+							Thread.sleep(4700); // this is the amount of time it takes for the Elevator to move across floors
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -113,13 +115,12 @@ public class Elevator implements Runnable {
 					
 					
 					if (state.getCurrentState() != ElevatorState.IDLE) {
-						System.out.println("Elevator: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ creating message to send @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 						createEleMsg();
 						eleSys.addOutboundMessage(eleMsg);
 					}
 
 					try {
-						Thread.sleep(4700);
+						Thread.sleep(4700); // this is the amount of time it takes for the Elevator to move across floors
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -132,12 +133,6 @@ public class Elevator implements Runnable {
 		while (true) {
 
 			processMessage();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 
