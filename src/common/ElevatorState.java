@@ -25,6 +25,8 @@ public enum ElevatorState {
 		public ElevatorState next(Transition transition) {
 			if (transition == Transition.REACHEDDESTINATION) {
 				return DOOROPEN;
+			}else if( transition == Transition.RECEIVEDMESSAGE_UP) {
+				return MOVINGUP;
 			}
 			return ILLEGAL;
 		}
@@ -34,6 +36,8 @@ public enum ElevatorState {
 		public ElevatorState next(Transition transition) {
 			if (transition == Transition.REACHEDDESTINATION) {
 				return DOOROPEN;
+			}else if( transition == Transition.RECEIVEDMESSAGE_DOWN) {
+				return MOVINGDOWN;
 			}
 			return ILLEGAL;
 		}
