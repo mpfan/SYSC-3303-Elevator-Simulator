@@ -99,8 +99,7 @@ public class Scheduler implements Runnable, MessageListener {
 	}
 	
 	/**
-	 * Schedule based on the messages. For now it will simply relay messages
-	 * between Elevator System and Floor System without any scheduling.
+	 * Schedule based on the messages.
 	 */
 	private void schedule() {
 		// Handle scheduling
