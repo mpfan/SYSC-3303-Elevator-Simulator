@@ -43,7 +43,7 @@ public class Elevator {
 			}
 		});
 		
-		upQueue = new PriorityQueue<FloorMessage>(10, new Comparator<FloorMessage>() {
+		downQueue = new PriorityQueue<FloorMessage>(10, new Comparator<FloorMessage>() {
 
 			@Override
 			public int compare(FloorMessage x, FloorMessage y) {
