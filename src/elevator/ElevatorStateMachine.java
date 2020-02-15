@@ -18,7 +18,6 @@ public class ElevatorStateMachine {
 	 *  Creates a new Elevator state machine
 	 */
 	public ElevatorStateMachine() {
-		
 		this.state = ElevatorState.IDLE;
 	}
     
@@ -28,7 +27,6 @@ public class ElevatorStateMachine {
      * @param transition The transition to the next state
      */
     public void onNext(Transition transition) {
-    	
     	this.state.next(transition);
     }
     
@@ -38,7 +36,6 @@ public class ElevatorStateMachine {
      * @return the current state
      */
     public ElevatorState getCurrentState() {
-    	
     	return this.state;
     }
 }
