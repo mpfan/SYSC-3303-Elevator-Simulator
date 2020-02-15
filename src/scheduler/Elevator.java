@@ -17,12 +17,15 @@ import common.ElevatorState;
 public class Elevator {
 	private int elevatorNum;
 	private ElevatorState state;
+	private int currentFloor;
+
 	private Queue<FloorMessage> upQueue;
 	private Queue<FloorMessage> downQueue;
 	
-	public Elevator(int elevatorNum) {
+	public Elevator(int elevatorNum, ElevatorState state, int currentFloor) {
 		this.elevatorNum = elevatorNum;
-		state = ElevatorState.ILLEGAL;
+		this.state = state;
+		this.currentFloor = currentFloor;
 		
 		upQueue = new PriorityQueue<FloorMessage>(10, new Comparator<FloorMessage>() {
 
@@ -90,5 +93,19 @@ public class Elevator {
 	 */
 	public Queue<FloorMessage> getDownQueue() {
 		return downQueue;
+	}
+	
+	/**
+	 * @return the currentFloor
+	 */
+	public int getCurrentFloor() {
+		return currentFloor;
+	}
+
+	/**
+	 * @param currentFloor the currentFloor to set
+	 */
+	public void setCurrentFloor(int currentFloor) {
+		this.currentFloor = currentFloor;
 	}
 }
