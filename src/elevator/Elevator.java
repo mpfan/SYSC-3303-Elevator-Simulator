@@ -1,5 +1,9 @@
 package elevator;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import common.Message;
 import common.MessageType;
 
@@ -20,6 +24,9 @@ public class Elevator implements Runnable {
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
 	private Message msg;
+
+	private HashSet<Integer> destination;
+
 	private ElevatorStateMachine state;
 	private ElevatorMode mode; // indicates if the elevator is meant to go up or down
 
@@ -40,6 +47,7 @@ public class Elevator implements Runnable {
 		this.eleSys = eleSys;
 		this.elevatorNumber = elevatorNumber;
 		this.state = new ElevatorStateMachine();
+		this.destination = new HashSet<Integer>();
 	}
 
 	/**
@@ -177,6 +185,15 @@ public class Elevator implements Runnable {
 	public void setElevatorNumber(int elevatorNumber) {
 		this.elevatorNumber = elevatorNumber;
 	}
+
+	/**
+	 * Add destination to elevator's Set of destination floors
+	 * @param destination
+	 */
+	public void addDestination(Integer destination) {
+		this.destination.add(destination);
+	}
+	
 	
 	/**
 	 * Mode indicating if the elevator is meant to go up or down
@@ -186,4 +203,5 @@ public class Elevator implements Runnable {
 		UP,
 		DOWN
 	}
+
 }
