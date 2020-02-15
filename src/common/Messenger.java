@@ -72,7 +72,14 @@ public class Messenger {
 							
 							Message msg = (Message) deserializeObject(packet.getData());
 							
-							messageListener.onMessageReceived(msg);
+							Thread messageWriter = new Thread(new Runnable() {
+								public void run() {
+									messageListener.onMessageReceived(msg);
+								}
+							});
+							
+							messageWriter.start();
+							
 						} catch (IOException e) {
 							System.out.println("Problem occured while receiving packet");
 							e.printStackTrace();
