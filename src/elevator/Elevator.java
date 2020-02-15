@@ -56,7 +56,9 @@ public class Elevator implements Runnable {
 		this.state = new ElevatorStateMachine();
 		this.destinations = new HashSet<Integer>();
 		this.currFloor = currFloor;
+		this.currDest = -1;
 		this.mode = ElevatorMode.IDLE;
+		this.msg = null;
 	}
 
 	/**
@@ -72,7 +74,10 @@ public class Elevator implements Runnable {
 				
 				while(true) {
 					
-					state.onNext(getElevatorDirection());
+					Transition transition = getElevatorDirection();
+					if (transition != null) {
+						state.onNext(transition);
+					}
 					
 					
 					if (state.getCurrentState() == ElevatorState.MOVINGDOWN) {
@@ -107,7 +112,12 @@ public class Elevator implements Runnable {
 		while (true) {
 
 			processMessage();
-
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -125,14 +135,16 @@ public class Elevator implements Runnable {
 		System.out.println("Elevator: Processing message in elevator...");
 		System.out.println("Elevator " + elevatorNumber + ": " + msg.getBody());
 
-		loadFloorMessage(msg);
+		FloorMessage receivedMsg = loadFloorMessage(msg);
 
 		System.out.println("Current state: " + this.state.getCurrentState());
-		
-		if(state.getCurrentState() == ElevatorState.IDLE) {
-			this.state.onNext(getElevatorDirection());
 
+		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
+			this.state.onNext(Transition.LOAD);
+		} else if (state.getCurrentState() == ElevatorState.IDLE) {
+			this.state.onNext(getElevatorDirection());
 		}
+		
 		System.out.println("New state: " + this.state.getCurrentState());
 
 		createEleMsg(); // create new elevator message
@@ -156,7 +168,7 @@ public class Elevator implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Elevator: setting message  to elevator with message: " + msg.getBody());
+		System.out.println("Elevator: setting message to: " + msg.getBody());
 		this.msg = msg;
 		notifyAll();
 	}
@@ -306,7 +318,7 @@ public class Elevator implements Runnable {
 	 * 
 	 * @param message
 	 */
-	public void loadFloorMessage(Message message) {
+	public FloorMessage loadFloorMessage(Message message) {
 		FloorMessage msg = new FloorMessage(message);
 		Integer newDest = new Integer(msg.getFloorNum());
 
@@ -319,6 +331,8 @@ public class Elevator implements Runnable {
 //		}
 		currDest = newDest;
 		addDestination(newDest);
+		
+		return msg;
 	}
 
 	/**
@@ -329,7 +343,11 @@ public class Elevator implements Runnable {
 	 */
 	public Transition getElevatorDirection() {
 		Transition direction;
-
+		
+		if (currDest < 0) {
+			return null;
+		}
+		
 		if (currFloor > currDest) {
 			direction = Transition.RECEIVEDMESSAGE_DOWN;
 		} else if (currFloor < currDest) {

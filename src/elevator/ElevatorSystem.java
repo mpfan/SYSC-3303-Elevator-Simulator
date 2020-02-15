@@ -1,11 +1,14 @@
 package elevator;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import common.Message;
-import common.MessageType;
-import scheduler.Scheduler;
+import common.MessageListener;
+import common.Messenger;
+import common.Ports;
 
 /**
  * System for managing elevators and receive messages from scheduler
@@ -13,10 +16,10 @@ import scheduler.Scheduler;
  * @author Derek Shao, Souheil Yazji
  *
  */
-public class ElevatorSystem implements Runnable {
+public class ElevatorSystem implements Runnable, MessageListener {
 
 	//Variables
-	private Scheduler scheduler;
+	private Messenger messenger;
 	private Elevator ele1;
 	private Queue<Message> inBoundRequests, outBoundRequests;
 
@@ -25,11 +28,11 @@ public class ElevatorSystem implements Runnable {
 	 * 
 	 * @param scheduler the scheduler
 	 */
-	public ElevatorSystem(Scheduler scheduler) {
-		this.scheduler = scheduler;
+	public ElevatorSystem() {
+		this.messenger = Messenger.getMessenger();
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
-		this.ele1 = new Elevator(10, 0, this,1);
+		this.ele1 = new Elevator(10, 0, this, 1);
 	}
 
 	/**
@@ -39,6 +42,13 @@ public class ElevatorSystem implements Runnable {
 		Thread eleThread = new Thread(this.ele1, "Elevator");
 		eleThread.start();
 	}
+	
+	public static void main(String[] args) {
+		
+		ElevatorSystem eleSys = new ElevatorSystem();
+		Thread elevatorSystemThread = new Thread(eleSys, "Elevator System");
+		elevatorSystemThread.start();
+	}
 
 	/**
 	 * Method to run
@@ -47,6 +57,7 @@ public class ElevatorSystem implements Runnable {
 	public void run() {
 
 		startElevators();
+		messenger.receive(Ports.ELEVATOR_PORT, this);
 		
 		// spawn another thread for sending out-bound messages
 		Thread outBoundThread = new Thread(new Runnable() {
@@ -64,36 +75,24 @@ public class ElevatorSystem implements Runnable {
 						}
 						
 						System.out.println("Elevator System: Sending outbound messages to scheduler");
-						scheduler.request(outBoundRequests.poll());
+						try {
+							messenger.send(outBoundRequests.poll(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
+						} catch (UnknownHostException e) {
+							e.printStackTrace();
+						}
 						outBoundRequests.notifyAll();
+					}
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
 		});
 		outBoundThread.start();
 		
-		Thread inBoundThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while(true) {
-					while (!inBoundRequests.isEmpty()) {
-						System.out.println("Elevator System: Sending messages to free elevator");
-						ele1.request(inBoundRequests.poll());
-					}
-
-					
-					System.out.println("Elevator System: Requesting messages from scheduler");
-					Queue<Message> elevatorMessages = scheduler.response(MessageType.ELEVATOR);
-					
-					if (elevatorMessages != null) {
-						inBoundRequests.addAll(elevatorMessages);
-						System.out.println("Elevator System: Received " + Integer.toString(elevatorMessages.size()) + " messages");
-					}
-				}	
-			}
-		});
-		inBoundThread.start();
 	}
 
 	/**
@@ -138,5 +137,19 @@ public class ElevatorSystem implements Runnable {
 	public int getNumElevators() {
 		//Currently just one elevator, will be updated for future iterations
 		return 1;
+	}		
+
+	@Override
+	public void onMessageReceived(Message message) {
+		Thread inBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				ele1.request(message);
+				System.out.println("Elevator System: Received: " + message.getBody());
+			}
+		});
+		inBoundThread.start();	
 	}
 }
