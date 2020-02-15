@@ -50,6 +50,7 @@ public class Scheduler implements Runnable, MessageListener {
 	 */
 	public void run() {
 		messenger.receive(PORT, this);
+		System.out.println("Scheduler listening on " + PORT);
 			
 		while(true) {
 			synchronized (messages) {
@@ -161,5 +162,11 @@ public class Scheduler implements Runnable, MessageListener {
 				}
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		Thread scheduler = new Thread(new Scheduler());
+		
+		scheduler.start();
 	}
 }
