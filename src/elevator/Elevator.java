@@ -6,13 +6,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Calendar;
 
-
-
-
 import common.FloorMessage;
+import common.ElevatorState;
+import common.ElevatorState.Transition;
 import common.Message;
 import common.MessageType;
-import common.ElevatorState.Transition;
 
 /**
  * 
@@ -61,6 +59,7 @@ public class Elevator implements Runnable {
 		this.state = new ElevatorStateMachine();
 		this.destinations = new HashSet<Integer>();
 		this.currFloor = currFloor;
+		this.mode = ElevatorMode.IDLE;
 	}
 
 	/**
@@ -121,6 +120,43 @@ public class Elevator implements Runnable {
 		notifyAll();
 	}
 
+	/**
+	 * Add a new destination for elevator to travel to
+	 * 
+	 * @param targetFloor the floor number for elevator to travel to
+	 */
+	public boolean pressButton(int targetFloor) {
+		
+		if (targetFloor >= buttonPressed.length || targetFloor < 0) {
+			return false; // if the floor number is invalid, immediately return
+		}
+		
+		if (this.mode.canMoveToFloor(currFloor, targetFloor, this.state.getCurrentState())) {
+			synchronized(destinations) {
+				this.destinations.add(targetFloor);
+			}
+			
+			return true;
+		} else if (this.state.getCurrentState() == ElevatorState.IDLE) {
+			
+			synchronized(destinations) {
+				this.destinations.add(targetFloor);
+				
+				if (targetFloor > currFloor) {
+					this.mode = ElevatorMode.UP;
+					this.state.onNext(Transition.PRESS_UP);
+				} else if (targetFloor < currFloor) {
+					this.mode = ElevatorMode.DOWN;
+					this.state.onNext(Transition.PRESS_DOWN);
+				}
+				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * Get the message currently stored in elevator
 	 * 
@@ -226,14 +262,6 @@ public class Elevator implements Runnable {
 	 */
 	public void addDestination(Integer destination) {
 		this.destinations.add(destination);
-	}
-
-	/**
-	 * Mode indicating if the elevator is meant to go up or down
-	 *
-	 */
-	public enum ElevatorMode {
-		UP, DOWN
 	}
 	
 	/**
