@@ -21,6 +21,7 @@ public class Elevator implements Runnable {
 	private ElevatorSystem eleSys;
 	private Message msg;
 	private ElevatorStateMachine state;
+	private ElevatorMode mode; // indicates if the elevator is meant to go up or down
 
 	private static final int CAPACITY = 19;
 
@@ -176,5 +177,13 @@ public class Elevator implements Runnable {
 	public void setElevatorNumber(int elevatorNumber) {
 		this.elevatorNumber = elevatorNumber;
 	}
-
+	
+	/**
+	 * Mode indicating if the elevator is meant to go up or down
+	 *
+	 */
+	public enum ElevatorMode {
+		UP,
+		DOWN
+	}
 }
