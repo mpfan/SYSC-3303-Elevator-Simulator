@@ -76,4 +76,11 @@ public class ElevatorMessage {
 	public int getElevatorNum() {
 		return elevatorNum;
 	}
+	
+	/**
+	 * @return wrapped in message object
+	 */
+	public Message toMessage() {
+		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + direction + "," + destination + ","+ elevatorNum);
+	}
 }

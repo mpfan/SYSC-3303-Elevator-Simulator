@@ -62,5 +62,10 @@ public class FloorMessage {
 	}
 	
 	
-	
+	/**
+	 * @return wrapped in message object
+	 */
+	public Message toMessage() {
+		return new Message(MessageType.FLOOR, time + "," + direction + "," + floorNum + ","+ eleNum);
+	}
 }
