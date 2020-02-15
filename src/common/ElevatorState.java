@@ -14,6 +14,8 @@ public enum ElevatorState {
 				return MOVINGUP;
 			} else if (transition == Transition.RECEIVEDMESSAGE_DOWN) {
 				return MOVINGDOWN;
+			}else if (transition == Transition.REACHEDDESTINATION) {
+				return DOOROPEN;
 			}
 			return ILLEGAL;
 		}

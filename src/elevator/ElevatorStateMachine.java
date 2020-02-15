@@ -7,7 +7,7 @@ import common.ElevatorState.Transition;
  * 
  * A class for the elevator's state machine
  * 
- * @author Hoang, Derek Shao
+ * @author Hoang, Derek Shao, Christophe Tran
  */
 public class ElevatorStateMachine {
 
@@ -27,7 +27,7 @@ public class ElevatorStateMachine {
 	 * @param transition The transition to the next state
 	 */
 	public void onNext(Transition transition) {
-		this.state.next(transition);
+		this.state = this.state.next(transition);
 	}
 
 	/**

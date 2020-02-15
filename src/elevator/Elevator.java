@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Calendar;
 
 
+
+
 import common.FloorMessage;
 import common.Message;
 import common.MessageType;
@@ -16,7 +18,7 @@ import common.ElevatorState.Transition;
  * 
  * Class representing the Elevator class
  * 
- * @author Derek Shao, Souheil Yazji
+ * @author Derek Shao, Souheil Yazji, Christophe Tran
  *
  */
 public class Elevator implements Runnable {
@@ -36,6 +38,7 @@ public class Elevator implements Runnable {
 
 	private ElevatorStateMachine state;
 	private ElevatorMode mode; // indicates if the elevator is meant to go up or down
+	private int floorPosition; // indicates the floor the elevator is currently at
 
 	private static final int CAPACITY = 19;
 
@@ -49,7 +52,7 @@ public class Elevator implements Runnable {
 	 * @param eleSys
 	 *            the elevator system
 	 */
-	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys) {
+	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys, int currFloor) {
 		this.capacity = CAPACITY;
 		this.people = 0;
 		this.door = false;
@@ -58,7 +61,7 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = elevatorNumber;
 		this.state = new ElevatorStateMachine();
 		this.destinations = new HashSet<Integer>();
-		this.currFloor = 0;
+		this.currFloor = floorPosition;
 	}
 
 	/**
@@ -84,27 +87,17 @@ public class Elevator implements Runnable {
 			}
 		}
 		System.out.println("Elevator: Processing message in elevator...");
+		System.out.println("Elevator " + elevatorNumber +  ": " + msg.getBody());	
+		
 		loadFloorMessage(msg);
-		System.out.println("Elevator " + elevatorNumber +  ": " + msg.getBody());
 		
-		while(currFloor != currDest) {
-			if(currFloor < currDest) {
-				state.onNext(Transition.RECEIVEDMESSAGE_UP);
-				currFloor++;
-			} else if (currFloor > currDest) {
-				state.onNext(Transition.RECEIVEDMESSAGE_DOWN);
-				currFloor--;
-			} else {
-				state.onNext(Transition.REACHEDDESTINATION);
-			}
-			createEleMsg(); // create new elevator message
-			this.eleSys.addOutboundMessage(eleMsg);	// send to system to send to scheduler		
-		}
+		System.out.println("Current state: " + this.state.getCurrentState());
+		this.state.onNext(getElevatorDirection());
+		System.out.println("New state: " + this.state.getCurrentState());
 		
-		
-		msg.setType(MessageType.ELEVATOR);
-		this.eleSys.addOutboundMessage(msg);
-		
+		createEleMsg(); // create new elevator message
+		this.eleSys.addOutboundMessage(eleMsg);	// send to system to send to scheduler		
+			
 		this.msg = null;
 		notifyAll();
 	}
@@ -264,7 +257,28 @@ public class Elevator implements Runnable {
 		addDestination(newDest);
 	}
 	
+	/**
+	 * Get the elevator direction
+	 * @param msg
+	 * @return
+	 */
+	public Transition getElevatorDirection() {
+		Transition direction;
+				
+		if(currFloor > currDest) {
+			direction = Transition.RECEIVEDMESSAGE_DOWN;
+		}
+		else if (currFloor < currDest) {
+			direction = Transition.RECEIVEDMESSAGE_UP;
+		}
+		else {
+			direction = Transition.REACHEDDESTINATION;
+		}
+		
+		return direction;
+	}
 	
+
 	/**
 	 * 
 	 * 

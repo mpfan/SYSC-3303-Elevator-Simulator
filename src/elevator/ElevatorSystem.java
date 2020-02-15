@@ -29,7 +29,7 @@ public class ElevatorSystem implements Runnable {
 		this.scheduler = scheduler;
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
-		this.ele1 = new Elevator(10, 0, this);
+		this.ele1 = new Elevator(10, 0, this,1);
 	}
 
 	/**

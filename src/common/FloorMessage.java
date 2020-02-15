@@ -26,7 +26,7 @@ public class FloorMessage {
 		time = mArr[0];
 		floorNum = Integer.parseInt(mArr[1]);
 		direction = mArr[2];
-		eleNum = Integer.parseInt(mArr[3]);
+		eleNum = Integer.parseInt(mArr[3].trim());
 	}
 
 
