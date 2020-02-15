@@ -7,7 +7,7 @@ import common.ElevatorState.Transition;
  * 
  * A class for the elevator's state machine
  * 
- * @author Hoang
+ * @author Hoang, Derek Shao
  */
 public class ElevatorStateMachine {
 
