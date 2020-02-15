@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.Calendar;
 
 import common.FloorMessage;
-import common.ElevatorState;
-import common.ElevatorState.Transition;
 import common.Message;
 import common.MessageType;
+import common.ElevatorState;
+import common.ElevatorState.Transition;
 
 /**
  * 
@@ -25,8 +25,8 @@ public class Elevator implements Runnable {
 	private int elevatorNumber; // elevator identifier
 	private int capacity;
 	private int people;
-	private int currFloor; //current floor
-	private int currDest; //current destination
+	private int currFloor; // current floor
+	private int currDest; // current destination
 	private boolean door;
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
@@ -42,12 +42,9 @@ public class Elevator implements Runnable {
 	/**
 	 * Constructor for elevator
 	 * 
-	 * @param numberOfButtons
-	 *            number of buttons in the elevator
-	 * @param elevatorNumber
-	 *            the elevator number
-	 * @param eleSys
-	 *            the elevator system
+	 * @param numberOfButtons number of buttons in the elevator
+	 * @param elevatorNumber  the elevator number
+	 * @param eleSys          the elevator system
 	 */
 	public Elevator(int numberOfButtons, int elevatorNumber, ElevatorSystem eleSys, int currFloor) {
 		this.capacity = CAPACITY;
@@ -68,8 +65,49 @@ public class Elevator implements Runnable {
 	@Override
 	public void run() {
 
+		Thread moveThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				while(true) {
+					
+					state.onNext(getElevatorDirection());
+					
+					
+					if (state.getCurrentState() == ElevatorState.MOVINGDOWN) {
+						currFloor--;
+					}
+					else if(state.getCurrentState() == ElevatorState.MOVINGUP) {
+						currFloor++;
+					}
+					else if(state.getCurrentState() == ElevatorState.DOOROPEN) {
+						door = true;
+					}
+					else if(state.getCurrentState() == ElevatorState.DOORCLOSE) {
+						door = false;
+					}
+					
+					if(state.getCurrentState() != ElevatorState.IDLE) {
+						createEleMsg();
+						eleSys.addOutboundMessage(eleMsg);
+					}
+
+					try {
+						Thread.sleep(4700);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+					
+			}
+		});
+		moveThread.start();
+
 		while (true) {
+
 			processMessage();
+
 		}
 	}
 
@@ -85,17 +123,21 @@ public class Elevator implements Runnable {
 			}
 		}
 		System.out.println("Elevator: Processing message in elevator...");
-		System.out.println("Elevator " + elevatorNumber +  ": " + msg.getBody());	
-		
+		System.out.println("Elevator " + elevatorNumber + ": " + msg.getBody());
+
 		loadFloorMessage(msg);
-		
+
 		System.out.println("Current state: " + this.state.getCurrentState());
-		this.state.onNext(getElevatorDirection());
-		System.out.println("New state: " + this.state.getCurrentState());
 		
+		if(state.getCurrentState() == ElevatorState.IDLE) {
+			this.state.onNext(getElevatorDirection());
+
+		}
+		System.out.println("New state: " + this.state.getCurrentState());
+
 		createEleMsg(); // create new elevator message
-		this.eleSys.addOutboundMessage(eleMsg);	// send to system to send to scheduler		
-			
+		this.eleSys.addOutboundMessage(eleMsg); // send to system to send to scheduler
+
 		this.msg = null;
 		notifyAll();
 	}
@@ -103,8 +145,7 @@ public class Elevator implements Runnable {
 	/**
 	 * Method for elevator to do work specified by message
 	 * 
-	 * @param msg
-	 *            Message with work for elevator to do
+	 * @param msg Message with work for elevator to do
 	 */
 	public synchronized void request(Message msg) {
 
@@ -170,8 +211,7 @@ public class Elevator implements Runnable {
 	/**
 	 * Set the elevator's capacity of the number of people
 	 * 
-	 * @param capacity
-	 *            The capacity of the elevator
+	 * @param capacity The capacity of the elevator
 	 */
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
@@ -196,8 +236,7 @@ public class Elevator implements Runnable {
 	/**
 	 * Set the amount of people in the elevator
 	 * 
-	 * @param people
-	 *            The amount of people in the elevator
+	 * @param people The amount of people in the elevator
 	 * @return true if the number of people has been changed, false otherwise
 	 */
 	public boolean setPeople(int people) {
@@ -229,8 +268,7 @@ public class Elevator implements Runnable {
 	/**
 	 * Set the elevator system instance
 	 * 
-	 * @param elevatorSystem
-	 *            the elevatorSystem to set
+	 * @param elevatorSystem the elevatorSystem to set
 	 */
 	public void setElevatorSystem(ElevatorSystem eleSys) {
 		this.eleSys = eleSys;
@@ -248,8 +286,7 @@ public class Elevator implements Runnable {
 	/**
 	 * Sets the elevator number
 	 * 
-	 * @param elevatorNumber
-	 *            the elevatorNumber to set
+	 * @param elevatorNumber the elevatorNumber to set
 	 */
 	public void setElevatorNumber(int elevatorNumber) {
 		this.elevatorNumber = elevatorNumber;
@@ -262,8 +299,8 @@ public class Elevator implements Runnable {
 	 */
 	public void addDestination(Integer destination) {
 		this.destinations.add(destination);
-	}
-	
+  }
+
 	/**
 	 * sets the elevator's destination from the floor message
 	 * 
@@ -272,7 +309,7 @@ public class Elevator implements Runnable {
 	public void loadFloorMessage(Message message) {
 		FloorMessage msg = new FloorMessage(message);
 		Integer newDest = new Integer(msg.getFloorNum());
-		
+
 //		if (!destinations.isEmpty()) {
 //			if (mode == ElevatorMode.DOWN && newDest > currDest) {
 //				currDest = newDest;
@@ -283,28 +320,26 @@ public class Elevator implements Runnable {
 		currDest = newDest;
 		addDestination(newDest);
 	}
-	
+
 	/**
 	 * Get the elevator direction
+	 * 
 	 * @param msg
 	 * @return
 	 */
 	public Transition getElevatorDirection() {
 		Transition direction;
-				
-		if(currFloor > currDest) {
+
+		if (currFloor > currDest) {
 			direction = Transition.RECEIVEDMESSAGE_DOWN;
-		}
-		else if (currFloor < currDest) {
+		} else if (currFloor < currDest) {
 			direction = Transition.RECEIVEDMESSAGE_UP;
-		}
-		else {
+		} else {
 			direction = Transition.REACHEDDESTINATION;
 		}
-		
+
 		return direction;
 	}
-	
 
 	/**
 	 * 
@@ -317,11 +352,12 @@ public class Elevator implements Runnable {
 		int mm = cal.get(Calendar.MINUTE);
 		int ss = cal.get(Calendar.SECOND);
 		int ms = cal.get(Calendar.MILLISECOND);
-		
-		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state + "," + currDest + "," + elevatorNumber;
+
+		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + "," + currDest + ","
+				+ elevatorNumber;
 
 		eleMsg = new Message(MessageType.ELEVATOR, body);
 		return eleMsg;
 	}
-	
+
 }

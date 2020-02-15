@@ -27,7 +27,15 @@ public class ElevatorStateMachine {
 	 * @param transition The transition to the next state
 	 */
 	public void onNext(Transition transition) {
-		this.state = this.state.next(transition);
+		synchronized(this.state) {
+			ElevatorState next = this.state.next(transition);
+			if(next != ElevatorState.ILLEGAL) {
+				this.state = next;
+			}
+			else {
+				System.out.println("Illegal state occurred");
+			}
+		}
 	}
 
 	/**
