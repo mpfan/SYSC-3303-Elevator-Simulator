@@ -38,7 +38,6 @@ public class Elevator implements Runnable {
 
 	private ElevatorStateMachine state;
 	private ElevatorMode mode; // indicates if the elevator is meant to go up or down
-	private int floorPosition; // indicates the floor the elevator is currently at
 
 	private static final int CAPACITY = 19;
 
@@ -61,7 +60,7 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = elevatorNumber;
 		this.state = new ElevatorStateMachine();
 		this.destinations = new HashSet<Integer>();
-		this.currFloor = floorPosition;
+		this.currFloor = currFloor;
 	}
 
 	/**
