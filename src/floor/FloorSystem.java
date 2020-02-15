@@ -145,6 +145,8 @@ public class FloorSystem implements Runnable, MessageListener {
 								
 								messenger.send(floorMessage.toMessage(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
 								break;
+							case DOORCLOSE:
+								break;
 							default:
 								System.out.println("FloorSystem: about to send: " + toSend.getBody());
 
