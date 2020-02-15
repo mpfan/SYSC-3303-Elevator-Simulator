@@ -20,6 +20,7 @@ public class Elevator implements Runnable {
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
 	private Message msg;
+	private ElevatorStateMachine state;
 
 	private static final int CAPACITY = 19;
 
@@ -37,6 +38,7 @@ public class Elevator implements Runnable {
 		this.buttonPressed = new boolean[numberOfButtons];
 		this.eleSys = eleSys;
 		this.elevatorNumber = elevatorNumber;
+		this.state = new ElevatorStateMachine();
 	}
 
 	/**
