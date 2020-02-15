@@ -3,7 +3,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import common.Message;
+import common.MessageListener;
 import common.MessageType;
+import common.Messenger;
+import common.SchedulerState;
 
 /**
  * This class represents a Scheduler. Scheduler will try to schedule 
@@ -12,80 +15,21 @@ import common.MessageType;
  * @author Michael Fan
  *
  */
-public class Scheduler implements Runnable {
+public class Scheduler implements Runnable, MessageListener {
+	public static int PORT = 8000;
 	
-	//Variables
+	private SchedulerStateMachine stateMachine;
+	private Messenger messenger;
 	private Queue<Message> messages;
-	private Queue<Message> elevatorMessages;
-	private Queue<Message> floorMessages;
 	
 	/**
 	 * Constructor for scheduler
 	 */
 	public Scheduler() {
 		messages = new LinkedList<Message>();
-		elevatorMessages = new LinkedList<Message>();
-		floorMessages = new LinkedList<Message>();
-	}
-	
-	/**
-	 * Write a message into the message queue. The client will call
-	 * this method to write a message into the queue.
-	 * 
-	 * @param message the client's message
-	 */
-	public void request(Message message) {
-		System.out.println("Scheduler: Message received from " + message.getType());
-		System.out.println("Scheduler: Message is: " + message.getBody());
-
-		synchronized (messages) {
-			messages.add(message);
-			messages.notifyAll();
-		}
-	}
-	
-	/**
-	 * Return messages of the specified type.
-	 * 
-	 * @param messageType the type of the message to return
-	 * @return a list of messages
-	 */
-	public Queue<Message> response(MessageType messageType) {
-		Queue<Message> messages = null;
 		
-		if(messageType == MessageType.ELEVATOR) {
-			synchronized (elevatorMessages) {
-				while(elevatorMessages.isEmpty()) {
-					try {
-						elevatorMessages.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
-				}
-				
-				messages = new LinkedList<Message>(elevatorMessages);
-				elevatorMessages.clear();
-				
-				elevatorMessages.notifyAll();
-			}
-		} else if(messageType == MessageType.FLOOR) {
-			synchronized (floorMessages) {
-				while(floorMessages.isEmpty()) {
-					try {
-						floorMessages.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
-				}
-				
-				messages = new LinkedList<Message>(floorMessages);
-				floorMessages.clear();
-				
-				floorMessages.notifyAll();
-			}
-		}
-		
-		return messages;
+		messenger = Messenger.getMessenger();
+		stateMachine = new SchedulerStateMachine();
 	}
 	
 	/**
@@ -93,27 +37,53 @@ public class Scheduler implements Runnable {
 	 * is no requests.
 	 */
 	public void run() {
+		messenger.receive(PORT, this);
+			
 		while(true) {
 			synchronized (messages) {
-				while(messages.isEmpty()) {
+				while(stateMachine.getCurrentState() == SchedulerState.IDLE) {
 					try {
 						messages.wait();
-					} catch (Exception e) {
-						
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 				
+				stateMachine.onNext(SchedulerState.Transition.RECEIVED_MESSAGE);
 				schedule();
-				
-				synchronized(elevatorMessages) {
-					elevatorMessages.notifyAll();
-				}
-				synchronized(floorMessages) {
-					floorMessages.notifyAll();
-				}
-				
+				stateMachine.onNext(SchedulerState.Transition.FINISHED_SCHEDULING);
 			}
+			
+			
 		}
+	}
+	
+	/**
+	 * Action performed when a message has been received.
+	 * 
+	 * @param message the message that has been received
+	 */
+	@Override
+	public void onMessageReceived(Message message) {
+		Thread messageWriter = new Thread(new Runnable() {
+			public void run() {
+				synchronized (messages) {
+					while(stateMachine.getCurrentState() == SchedulerState.BUSY) {
+						try {
+							messages.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					
+					messages.add(message);
+					
+					messages.notifyAll();
+				}
+			}
+		});
+		
+		messageWriter.start();
 	}
 	
 	/**
@@ -121,23 +91,6 @@ public class Scheduler implements Runnable {
 	 * between Elevator System and Floor System without any scheduling.
 	 */
 	private void schedule() {
-		synchronized (messages) {
-			for(int i = 0; i < messages.size(); i++) {
-				Message m = messages.remove();
-				switch (m.getType()) {
-					case ELEVATOR: 
-						synchronized (floorMessages) {
-							floorMessages.add(m);
-						}
-						break;
-					case FLOOR:
-						synchronized (elevatorMessages) {
-							elevatorMessages.add(m);
-						}
-					default:
-					// Should never reach here
-				}
-			}
-		}
+		// Handle scheduling
 	}
 }
