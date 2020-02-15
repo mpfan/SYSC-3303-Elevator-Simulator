@@ -18,6 +18,13 @@ public class FloorMessage {
 	public FloorMessage(Message message) {
 		parse(message);
 	}
+	
+	public FloorMessage(String time, String direction, int floorNum, int eleNum) {
+		this.time = time;
+		this.direction = direction;
+		this.floorNum = floorNum;
+		this.eleNum = eleNum;
+	}
 
 	
 	private void parse(Message message) {
@@ -66,6 +73,6 @@ public class FloorMessage {
 	 * @return wrapped in message object
 	 */
 	public Message toMessage() {
-		return new Message(MessageType.FLOOR, time + "," + direction + "," + floorNum + ","+ eleNum);
+		return new Message(MessageType.FLOOR, time + "," + floorNum + "," + direction + ","+ eleNum);
 	}
 }

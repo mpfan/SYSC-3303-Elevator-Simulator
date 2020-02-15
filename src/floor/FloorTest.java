@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import common.Message;
 import common.MessageType;
-import scheduler.Scheduler;
 
 /**
  * Class to run tests on all Floor related classes
@@ -26,7 +25,7 @@ class FloorTest {
 	 * Method to test the floor class 
 	 */
 	void floorSystemTest() {
-		FloorSystem floorSystem = new FloorSystem(new Scheduler(), 1);
+		FloorSystem floorSystem = new FloorSystem(1);
 		assertTrue("Check if there is exactly one floor", floorSystem.numOfFloors() == 1);
 	}
 	
@@ -34,7 +33,7 @@ class FloorTest {
 	 * Method to test the floor class 
 	 */
 	void floorTest() {
-		Floor floor = new Floor(new FloorSystem(new Scheduler(), 1), 1, 1);
+		Floor floor = new Floor(new FloorSystem(1), 1, 1);
 		assertTrue("Check if there is exactly one door", floor.numOfDoors() == 1);
 		assertTrue("Check if the floor number is 1", floor.getFloorNum() == 1);
 		assertTrue("Check that the floor has exactly 0 people", floor.getPeople() == 0);
@@ -43,7 +42,7 @@ class FloorTest {
 	}
 	
 	void floorSystemMessageTest() {
-		FloorSystem floorSystem = new FloorSystem(new Scheduler(), 1);
+		FloorSystem floorSystem = new FloorSystem(1);
 		Floor floor = floorSystem.getFloors().get(0);
 		assertNull("Floor should currently contain no message", floor.getMessage());
 		floor.request(new Message(MessageType.FLOOR, "Message from floor"));

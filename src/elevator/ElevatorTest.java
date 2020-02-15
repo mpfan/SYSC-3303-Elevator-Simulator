@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import common.Message;
 import common.MessageType;
-import scheduler.Scheduler;
 
 /**
  * Class to run tests on all elevator related classes
@@ -26,7 +25,7 @@ class ElevatorTest {
 	 * Method to run tests on the elevator system
 	 */
 	void elevatorSystemTest() {
-		ElevatorSystem elevatorSystem = new ElevatorSystem(new Scheduler());
+		ElevatorSystem elevatorSystem = new ElevatorSystem();
 		assertTrue("Check if there is exactly one elevator in the system", elevatorSystem.getNumElevators() == 1);
 	}
 	
@@ -34,7 +33,7 @@ class ElevatorTest {
 	 * Method to run tests on the elevator class
 	 */
 	void elevatorTest() {
-		Elevator elevator = new Elevator(1, 1, new ElevatorSystem(new Scheduler()),1);
+		Elevator elevator = new Elevator(1, 1, new ElevatorSystem(),1);
 		assertTrue("Check that the elevator capacity is 19", elevator.getCapacity() == 19);
 		assertTrue("Check that there are 0 people in the elevator", elevator.getPeople() == 0);
 		assertFalse("Check that the elevator cannot fit 20 people", elevator.setPeople(20));
@@ -53,7 +52,7 @@ class ElevatorTest {
 	 */
 	void elevatorMessageSystemInteraction() {
 	
-		ElevatorSystem eleSys = new ElevatorSystem(new Scheduler());
+		ElevatorSystem eleSys = new ElevatorSystem();
 		Elevator elevator = new Elevator(20, 2, eleSys, 1);
 		
 		elevator.request(new Message(MessageType.ELEVATOR, "Elevator Message"));
