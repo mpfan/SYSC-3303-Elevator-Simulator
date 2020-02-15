@@ -8,11 +8,13 @@ package floor;
 public class FloorDoor {
 	// Variable
 	private boolean isOpen;
+	private FloorDoorStateMachine state;
 	
 	/**
 	* Constructor for a floor door
 	*/
 	public FloorDoor() {
+		state = new FloorDoorStateMachine();
 		this.isOpen = false;
 	}
 	
