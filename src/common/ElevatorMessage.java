@@ -13,7 +13,7 @@ public class ElevatorMessage {
 	private String time;
 
 	private int currentFloor;
-	private ElevatorState direction;
+	private ElevatorState state;
 	private int destination;
 	private int elevatorNum;
 	
@@ -37,7 +37,7 @@ public class ElevatorMessage {
 		
 		time = mArr[0];
 		currentFloor = Integer.parseInt(mArr[1]);
-		direction = ElevatorState.valueOf(mArr[2]);
+		state = ElevatorState.valueOf(mArr[2]);
 		destination = Integer.parseInt(mArr[3]);
 		elevatorNum = Integer.parseInt(mArr[4]);
 	}
@@ -59,8 +59,8 @@ public class ElevatorMessage {
 	/**
 	 * @return the direction
 	 */
-	public ElevatorState getDirection() {
-		return direction;
+	public ElevatorState getState() {
+		return state;
 	}
 
 	/**
@@ -81,6 +81,6 @@ public class ElevatorMessage {
 	 * @return wrapped in message object
 	 */
 	public Message toMessage() {
-		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + direction + "," + destination + ","+ elevatorNum);
+		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + state + "," + destination + ","+ elevatorNum);
 	}
 }
