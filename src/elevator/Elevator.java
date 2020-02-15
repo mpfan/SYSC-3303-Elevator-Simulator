@@ -244,7 +244,11 @@ public class Elevator implements Runnable {
 		UP, DOWN
 	}
 	
-	
+	/**
+	 * sets the elevator's destination from the floor message
+	 * 
+	 * @param message
+	 */
 	public void loadFloorMessage(Message message) {
 		FloorMessage msg = new FloorMessage(message);
 		Integer newDest = new Integer(msg.getFloorNum());
@@ -261,7 +265,11 @@ public class Elevator implements Runnable {
 	}
 	
 	
-	
+	/**
+	 * 
+	 * 
+	 * @return returns the message to be sent to the elevator
+	 */
 	private Message createEleMsg() {
 		Calendar cal = Calendar.getInstance();
 		int hh = cal.get(Calendar.HOUR_OF_DAY);
