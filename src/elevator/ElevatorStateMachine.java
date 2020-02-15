@@ -10,32 +10,32 @@ import common.ElevatorState.Transition;
  * @author Hoang
  */
 public class ElevatorStateMachine {
-	
+
 	/* The current Elevator state */
 	private ElevatorState state;
-	
+
 	/**
-	 *  Creates a new Elevator state machine
+	 * Creates a new Elevator state machine
 	 */
 	public ElevatorStateMachine() {
 		this.state = ElevatorState.IDLE;
 	}
-    
-    /**
-     * Transition to the next state
-     * 
-     * @param transition The transition to the next state
-     */
-    public void onNext(Transition transition) {
-    	this.state.next(transition);
-    }
-    
-    /**
-     * Get the current state
-     * 
-     * @return the current state
-     */
-    public ElevatorState getCurrentState() {
-    	return this.state;
-    }
+
+	/**
+	 * Transition to the next state
+	 * 
+	 * @param transition The transition to the next state
+	 */
+	public void onNext(Transition transition) {
+		this.state.next(transition);
+	}
+
+	/**
+	 * Get the current state
+	 * 
+	 * @return the current state
+	 */
+	public ElevatorState getCurrentState() {
+		return this.state;
+	}
 }
