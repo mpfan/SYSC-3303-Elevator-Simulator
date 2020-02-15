@@ -63,9 +63,8 @@ public enum ElevatorState {
 		}
 	};
 	
-	public ElevatorState next(Transition transition) {
-		return null;
-	}
+	/* Common method to move to next transition */
+	public abstract ElevatorState next(Transition transition);
 	
 	/**
 	 * Transitions
