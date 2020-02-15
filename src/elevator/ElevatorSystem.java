@@ -74,9 +74,11 @@ public class ElevatorSystem implements Runnable, MessageListener {
 							}
 						}
 						
+						Message msg = outBoundRequests.poll();
 						System.out.println("Elevator System: Sending outbound messages to scheduler");
+						System.out.println("Elevator System: outbound message: " + msg.getBody());
 						try {
-							messenger.send(outBoundRequests.poll(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
+							messenger.send(msg, Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
 						} catch (UnknownHostException e) {
 							e.printStackTrace();
 						}

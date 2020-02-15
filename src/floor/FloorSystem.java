@@ -141,7 +141,7 @@ public class FloorSystem implements Runnable, MessageListener {
 
 								FloorMessage floorMessage = new FloorMessage(hh + ":" + mm + ":" + ss + ":" + ms, "FINISHED_LOAD", eleMessage.getCurrentFloor(), eleMessage.getElevatorNum());
 								
-								System.out.println("FloorSystem: about to send: " + floorMessage.toMessage());
+								System.out.println("FloorSystem: about to send: " + floorMessage.toMessage().getBody());
 								
 								messenger.send(floorMessage.toMessage(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
 								break;
