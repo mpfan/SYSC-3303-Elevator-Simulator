@@ -9,19 +9,19 @@ public enum FloorDoorState {
 	CLOSE {
 		@Override
 		public FloorDoorState next(Transition transition) {
-			if (transition == Transition.RECEIVEDMESSAGE) {
+			if (transition == Transition.RECEIVEDMESSAGE) { //Check if the floor door has received a message
 				return OPEN;
 			}
-			return ILLEGAL;
+			return ILLEGAL; //The current transition is invalid
 		}
 	},
 	OPEN {
 		@Override
 		public FloorDoorState next(Transition transition) {
-			if (transition == Transition.LOAD || transition == Transition.UNLOAD) {
+			if (transition == Transition.LOAD || transition == Transition.UNLOAD) { //Check if people has entered/left through the door
 				return CLOSE;
 			}
-			return ILLEGAL;
+			return ILLEGAL; //The current transition is invalid
 		}
 	},
 	ILLEGAL {

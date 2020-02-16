@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Test class to perform a junit test on Class Message
+ * 
+ * @author Michael Fan, Hoang Bui
+ */
 class MessageTest {
 
 	@Test

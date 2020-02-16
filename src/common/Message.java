@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * Class for messages that are sent between floor system and scheduler, also elevator system and scheduler
  *
+ * @author Derek Shao, Hoang Bui
  */
 public class Message implements Serializable {
 

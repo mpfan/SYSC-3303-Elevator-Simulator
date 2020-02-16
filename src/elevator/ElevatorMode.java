@@ -4,7 +4,8 @@ import common.ElevatorState;
 
 /**
  * Enum representing elevator modes - UP, DOWN, or IDLE
- *
+ * 
+ * @author Derek Shao, Hoang Bui
  */
 public enum ElevatorMode {
 	UP {
@@ -58,7 +59,6 @@ public enum ElevatorMode {
 	IDLE {
 		@Override
 		public boolean canMoveToFloor(int currentFloor, int targetFloor, ElevatorState state) {
-
 			return true;
 		}
 	};

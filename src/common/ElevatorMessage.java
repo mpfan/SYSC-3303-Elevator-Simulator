@@ -6,7 +6,7 @@ import common.Message;
 /**
  * Wrapper for an Elevator message.
  * 
- * @author Michael Fan 101029934
+ * @author Michael Fan 101029934, Hoang bui
  *
  */
 public class ElevatorMessage {
@@ -43,42 +43,54 @@ public class ElevatorMessage {
 	}
 	
 	/**
-	 * @return the time
+	 * Method to obtain the time
+	 * 
+	 * @return time the time
 	 */
 	public String getTime() {
 		return time;
 	}
 
 	/**
-	 * @return the currentFloor
+	 * Method to obtain the current floor that the elevator is on
+	 * 
+	 * @return currentFloor the current floor the elevator is on
 	 */
 	public int getCurrentFloor() {
 		return currentFloor;
 	}
 
 	/**
-	 * @return the direction
+	 * Method to obtain the elevator's state
+	 * 
+	 * @return state the elevator's state
 	 */
 	public ElevatorState getState() {
 		return state;
 	}
 
 	/**
-	 * @return the destination
+	 * Method to obtain the destination of the elevator
+	 * 
+	 * @return destination the destination of the elevator
 	 */
 	public int getDestination() {
 		return destination;
 	}
 
 	/**
-	 * @return the elevatorNum
+	 * Method to obtain the elevator's number
+	 * 
+	 * @return elevatorNum the elevator's number
 	 */
 	public int getElevatorNum() {
 		return elevatorNum;
 	}
 	
 	/**
-	 * @return wrapped in message object
+	 * Method obtain a message based on the elevator
+	 * 
+	 * @return the content of message wrapped in a message object
 	 */
 	public Message toMessage() {
 		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + state + "," + destination + ","+ elevatorNum);

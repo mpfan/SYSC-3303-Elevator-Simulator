@@ -3,27 +3,27 @@ package common;
 /**
  * A enum class for the scheduler states
  * 
- * @author Michael Fan
+ * @author Michael Fan, Hoang Bui
  */
 public enum SchedulerState {
 
 	IDLE {
 		@Override
 		public SchedulerState next(Transition transition) {
-			if (transition == Transition.RECEIVED_MESSAGE) {
+			if (transition == Transition.RECEIVED_MESSAGE) { //Check if the scheduler has received an message
 				return BUSY;
 			}
 			
-			return ILLEGAL;
+			return ILLEGAL; //transition is was illegal
 		}
 	},
 	BUSY {
 		@Override
 		public SchedulerState next(Transition transition) {
-			if (transition == Transition.FINISHED_SCHEDULING) {
+			if (transition == Transition.FINISHED_SCHEDULING) { //Check if the scheduler has finish scheduling
 				return IDLE;
 			}
-			return ILLEGAL;
+			return ILLEGAL; //transition is was illegal
 		}
 	},
 	ILLEGAL {

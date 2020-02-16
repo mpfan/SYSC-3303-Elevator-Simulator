@@ -13,7 +13,7 @@ import common.ElevatorState.Transition;
  * 
  * Class representing the Elevator class
  * 
- * @author Derek Shao, Souheil Yazji, Christophe Tran
+ * @author Derek Shao, Souheil Yazji, Christophe Tran, Hoang Bui
  *
  */
 public class Elevator implements Runnable {
@@ -21,7 +21,7 @@ public class Elevator implements Runnable {
 	// Variables
 	private int elevatorNumber; // elevator identifier
 	private int capacity;
-	private int people;
+	private int people; //number of people inside the elevator
 	private int currFloor; // current floor
 	private int currDest; // current destination
 	private boolean door;
@@ -371,7 +371,7 @@ public class Elevator implements Runnable {
 	}
 
 	/**
-	 * 
+	 * Method to create an elevator message
 	 * 
 	 * @return returns the message to be sent to the elevator
 	 */

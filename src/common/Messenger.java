@@ -16,7 +16,7 @@ import java.util.Set;
  * This class provides an abstraction over the java UDP sockets
  * and packets.
  * 
- * @author Michael Fan 101029934
+ * @author Michael Fan 101029934, Derek Shao
  *
  */
 public class Messenger {
