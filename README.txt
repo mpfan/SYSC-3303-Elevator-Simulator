@@ -1,7 +1,7 @@
 SYSC3303 Project Group 4
 
 About
-The project designs and implements an elevator control system and simulator through Java multithreading. The system will consist of an elevator scheduler, a simulator for the elevator cars, and a simulator for floors. 
+The project designs and implements an elevator control system and simulator through Java multithreading. The system will consist of an elevator scheduler, a simulator for the elevator cars, and a simulator for floors.
 
 Members of Group 4:
 - Michael Fan
@@ -12,70 +12,111 @@ Members of Group 4:
 
 EXPLANATION OF FILES
 
-Common Package
+COMMON PACKAGE
 
-- Message.java 
-    - scheduler, floor and elevator systems uses Message objects to communicate with each other
-
+- ElevatorMessage.java
+ 	 - Wrapper and parser for elevator messages
+- ElevatorState.java
+  	- States for elevator
+- FloorDoorState.java
+  	- States for floor door 
+- FloorMessage.java
+  	- Wrapper and parser for floor messages 
+- Message.java
+  	- Standard message format for passing information between the scheduler, 
+   	  elevator and floor
+- MessageListener.java
+  	- Interface for message event listener
+- MessageTest.java
+  	- Test cases for the 
 - MessageType.java
-    - enum class for specifying the type of message - could be a ELEVATOR or FLOOR message
+ 	- Enum class for specifying the type of message - could be a ELEVATOR or FLOOR  
+	  message
+- Messenger.java
+ 	- Common class for UDP message communication
+- MessengerTest.java
+ 	- Test the Messenger class
+- Ports.java
+ 	- Constants file for ports used for Scheduler, Elevator, and Floor system
+- SchedulerState.java
+ 	- States for scheduler
 
-Scheduler Package
+SCHEDULER PACKAGE
 - Scheduler.Java
-    - class used to coordinate elevators and floors
+- Class used to coordinate elevators and floors
+- SchedulerTest.java
+	- Tests for scheduler
+- ElevatorModel.java
+	- An internal model used to store information about an 
+ 	  information. Used by the scheduler
+- SchedulerStateMachine.java
+-  A class for the scheduler's state machine
+- SchedulerStateMachineTest.java
+	- Tests for scheduler state machine
 
-Elevator Package
+ELEVATOR PACKAGE
+Elevator.java
+- class used to represent an elevator class
+ElevatorMode.java
+- enumeration class to represent the different modes Elevator could be: UP/DOWN/IDLE mode
+ElevatorStateMachine.java
+- class representing the Elevator state machines
+ElevatorSystem.java
+- class used to coordinate the elevators
+ElevatorTest.java
+- tests for the elevator system and elevator
 
-- Elevator.java
-    - class representing an elevator
-
-- ElevatorSystem.java
-    - class used to communicate with Scheduler and coordinate the elevators available
-
-Floor Package
-
-- Floor.java
-    - class representing a floor
-
-- FloorDoor.java
-    - a Floor contains a FloorDoor
-    - used to represent opening/closing of doors
-
-- FloorSystem.java
-    - class used to communicate with Scheduler and coordinate the floors available
-
+FLOOR PACKAGE
+Floor.java
+- class used to represent a floor
+FloorDoor.java
+- class used to represent the different doors on a floor
+FloorDoorStateMachine.java
+- class used to represent a possible states in a floor door
+FloorSystem.java
+- class for receiving messages from scheduler and sending messages to floors
+FloorTest.java
+- tests for floor classes
+Input.txt
+- contains input events 
 Other
-
-- Main.java
-    - entry point for program which starts the Scheduler, FloorSystem, and ElevatorSystem threads
-
 
 RUNNING THE PROGRAM
 
-Run Main.java to start the program
+Must run in sequence:
+Run Scheduler.java
+Run ElevatorSystem.java
+Run FloorSystem.java
 
-UNIT TESTS
+Program will end when Elevator system reaches an IDLE state (no more messages to pass)
 
-Unit tests could be found in files MessageTest.java, ElevatorTest.java, FloorTest.java and SchedulerTest.java
+TESTING INSTRUCTIONS
+
+Run the test files:
+ElevatorTest.java
+FloorTest.java
+MessageTest.java
+MessengerTest.java
+SchedulerTest.java
+SchedulerStateMachineTest.java
 
 BREAKDOWN OF RESPONSIBILITIES
-
 - Scheduler
-    - Michael Fan
-
+-Michael Fan
+-Derek Shao
+-Hoang Bui
 - Elevator System
-    - Derek Shao
-    - Souheil Yazji
-
+-Everyone
 - Floor System
-    - Christophe Tran
-    - Hoang Bui
-
+   	-Christophe Tran
+ 	-Hoang Bui
 - Unit tests
-    - Everyone
-
+-Everyone
 - UML Class Diagram
-    - Everyone
-
+-Everyone
 - UML Sequence Diagram
-    - Everyone
+-Everyone
+- UML State Diagram
+-Everyone
+- README
+	-Everyone
