@@ -255,6 +255,8 @@ public class Elevator implements Runnable {
 	}
 
 	/**
+	 * Get the floor the elevator is currently at
+	 * 
 	 * @return the currFloor
 	 */
 	public int getCurrFloor() {
@@ -350,7 +352,7 @@ public class Elevator implements Runnable {
 	 * Get the elevator direction
 	 * 
 	 * @param msg
-	 * @return
+	 * @return The appropriate transition to get the proper direction
 	 */
 	public Transition getElevatorDirection() {
 		Transition direction;
