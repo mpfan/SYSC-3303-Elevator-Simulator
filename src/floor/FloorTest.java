@@ -50,7 +50,7 @@ class FloorTest {
 		assertTrue("Floor system should currently have no outbound messages",floorSystem.getOutBoundRequests().size() == 0);
 		floor.processMessage();
 		assertNull("Floor should have sent message", floor.getMessage());
-		assertTrue("Floor system should have recieved message from floor", floorSystem.getOutBoundRequests().size() == 1);
+		assertTrue("Floor system should have recieved message from floor", floorSystem.getOutBoundRequests().size() == 6);
 
 	}
 	
