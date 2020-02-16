@@ -189,6 +189,13 @@ public class Scheduler implements Runnable, MessageListener {
 		}
 	}
 	
+	/**
+	 * @return the messages queue
+	 */
+	public Queue<Message> getMessages() {
+		return messages;
+	}
+	
 	public static void main(String[] args) {
 		Thread scheduler = new Thread(new Scheduler());
 		
