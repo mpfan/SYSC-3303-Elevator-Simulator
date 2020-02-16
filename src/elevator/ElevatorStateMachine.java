@@ -32,9 +32,6 @@ public class ElevatorStateMachine {
 			if(next != ElevatorState.ILLEGAL) {
 				this.state = next;
 			}
-			else {
-				System.out.println("Illegal state occurred");
-			}
 		}
 	}
 
@@ -45,5 +42,14 @@ public class ElevatorStateMachine {
 	 */
 	public ElevatorState getCurrentState() {
 		return this.state;
+	}
+	
+	/**
+	 * Set the current state
+	 * 
+	 * @param state the state to set to
+	 */
+	public void setState(ElevatorState state) {
+		this.state = state;
 	}
 }

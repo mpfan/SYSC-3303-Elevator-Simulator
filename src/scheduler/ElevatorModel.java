@@ -14,7 +14,7 @@ import common.ElevatorState;
  * @author Michael Fan
  *
  */
-public class Elevator {
+public class ElevatorModel {
 	private int elevatorNum;
 	private ElevatorState state;
 	private int currentFloor;
@@ -22,7 +22,7 @@ public class Elevator {
 	private Queue<FloorMessage> upQueue;
 	private Queue<FloorMessage> downQueue;
 	
-	public Elevator(int elevatorNum, ElevatorState state, int currentFloor) {
+	public ElevatorModel(int elevatorNum, ElevatorState state, int currentFloor) {
 		this.elevatorNum = elevatorNum;
 		this.state = state;
 		this.currentFloor = currentFloor;

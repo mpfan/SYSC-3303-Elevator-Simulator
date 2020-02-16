@@ -14,7 +14,9 @@ import common.Message;
 import common.MessageListener;
 import common.MessageType;
 import common.Messenger;
+import common.Ports;
 import common.SchedulerState;
+import common.SchedulerState.Transition;
 
 /**
  * This class represents a Scheduler. Scheduler will try to schedule 
@@ -24,21 +26,18 @@ import common.SchedulerState;
  *
  */
 public class Scheduler implements Runnable, MessageListener {
-	public static int PORT = 8000;
-	public static int ELEVATOR_PORT = 8001;
-	public static int FLOOR_PORT = 8002;
-	
+
 	private SchedulerStateMachine stateMachine;
 	private Messenger messenger;
 	private Queue<Message> messages;
-	private Map<Integer, Elevator> elevatorModel;
+	private Map<Integer, ElevatorModel> elevatorModel;
 	
 	/**
 	 * Constructor for scheduler
 	 */
 	public Scheduler() {
 		messages = new LinkedList<Message>();
-		elevatorModel = new HashMap<Integer, Elevator>();
+		elevatorModel = new HashMap<Integer, ElevatorModel>();
 		
 		messenger = Messenger.getMessenger();
 		stateMachine = new SchedulerStateMachine();
@@ -49,8 +48,8 @@ public class Scheduler implements Runnable, MessageListener {
 	 * is no requests.
 	 */
 	public void run() {
-		messenger.receive(PORT, this);
-		System.out.println("Scheduler listening on " + PORT);
+		messenger.receive(Ports.SCHEDULER_PORT, this);
+		System.out.println("Scheduler listening on " + Ports.SCHEDULER_PORT);
 			
 		while(true) {
 			synchronized (messages) {
@@ -78,6 +77,7 @@ public class Scheduler implements Runnable, MessageListener {
 	 */
 	@Override
 	public void onMessageReceived(Message message) {
+		System.out.println("Scheduler: Received message: " + message.getType() + " " + message.getBody());
 		Thread messageWriter = new Thread(new Runnable() {
 			public void run() {
 				synchronized (messages) {
@@ -89,8 +89,9 @@ public class Scheduler implements Runnable, MessageListener {
 						}
 					}
 					
-					messages.add(message);
 					
+					messages.add(message);
+					stateMachine.onNext(Transition.RECEIVED_MESSAGE);
 					messages.notifyAll();
 				}
 			}
@@ -111,9 +112,9 @@ public class Scheduler implements Runnable, MessageListener {
 			if(msg.getType() == MessageType.ELEVATOR) {
 				// The message might have three meaning
 				ElevatorMessage em = new ElevatorMessage(msg);
-				Elevator elevator = null;
+				ElevatorModel elevator = null;
 				if(!elevatorModel.containsKey(em.getElevatorNum())) {
-					elevator = new Elevator(em.getElevatorNum(), em.getState(), em.getCurrentFloor());
+					elevator = new ElevatorModel(em.getElevatorNum(), em.getState(), em.getCurrentFloor());
 					elevatorModel.put(em.getElevatorNum(), elevator);
 				} else {
 					// Update the corresponding elevator state
@@ -125,7 +126,13 @@ public class Scheduler implements Runnable, MessageListener {
 				// Tell floor to open door
 				if(elevator.getState() == ElevatorState.DOOROPEN) {
 					try {
-						messenger.send(em.toMessage(), ELEVATOR_PORT, InetAddress.getLocalHost());
+						messenger.send(em.toMessage(), Ports.FLOOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				} else if (elevator.getState() == ElevatorState.DOORCLOSE) { // Tell floor to close door
+					try {
+						messenger.send(em.toMessage(), Ports.FLOOR_PORT, InetAddress.getLocalHost());
 					} catch (UnknownHostException e) {
 						e.printStackTrace();
 					}
@@ -133,34 +140,52 @@ public class Scheduler implements Runnable, MessageListener {
 				
 			} else if(msg.getType() == MessageType.FLOOR) {
 				FloorMessage fm = new FloorMessage(msg);
+								
+				if (!elevatorModel.containsKey(fm.getEleNum())) {
+					try {
+						messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+					continue;
+				}
 				
 				// Retrieve the corresponding the elevator model
-				Elevator elevator = elevatorModel.get(fm.getEleNum());
+				ElevatorModel elevator = elevatorModel.get(fm.getEleNum());
 				
 				if(fm.getDirection().equalsIgnoreCase("up")) {
 					// Elevator is on the way up and is able to pick up this floor
 					if(elevator.getState() == ElevatorState.MOVINGUP && elevator.getCurrentFloor() < fm.getFloorNum()) {
 						try {
-							messenger.send(fm.toMessage(), FLOOR_PORT, InetAddress.getLocalHost());
+							messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
 						} catch (UnknownHostException e) {
 							e.printStackTrace();
 						}
 					} else {
 						elevator.getUpQueue().add(fm);
 					}
-				} else {
+				} else if (fm.getDirection().equalsIgnoreCase("down")) {
 					// Elevator is on the way down and is able to pick up this floor
 					if(elevator.getState() == ElevatorState.MOVINGDOWN && elevator.getCurrentFloor() > fm.getFloorNum()) {
 						try {
-							messenger.send(fm.toMessage(), FLOOR_PORT, InetAddress.getLocalHost());
+							messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
 						} catch (UnknownHostException e) {
 							e.printStackTrace();
 						}
 					} else {
 						elevator.getDownQueue().add(fm);
 					}
+				} else if (fm.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
+					try {
+						messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
 				}
-			}
+			}	
+		}
+		if (!messages.isEmpty()) {
+			messages.remove();
 		}
 	}
 	

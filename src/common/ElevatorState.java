@@ -58,7 +58,9 @@ public enum ElevatorState {
 				return MOVINGUP;
 			} else if (transition == Transition.PRESS_DOWN) {
 				return MOVINGDOWN;
-			}
+			} else if (transition == Transition.REACHEDDESTINATION) {
+				return IDLE;
+			} 
 			return ILLEGAL;
 		}
 	},
