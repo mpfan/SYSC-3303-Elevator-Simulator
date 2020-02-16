@@ -11,13 +11,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import common.ElevatorState;
+import common.ElevatorState.Transition;
 import common.Message;
 import common.MessageType;
 
 /**
  * Class to run tests on all elevator related classes
  * 
- * @author Hoang Bui
+ * @author Hoang Bui, Christophe Tran
  */
 class ElevatorTest {
 
@@ -55,11 +57,26 @@ class ElevatorTest {
 		ElevatorSystem eleSys = new ElevatorSystem();
 		Elevator elevator = new Elevator(20, 2, eleSys, 1);
 		
-		elevator.request(new Message(MessageType.ELEVATOR, "Elevator Message"));
+		elevator.request(new Message(MessageType.ELEVATOR, "10:22:11.0,1,Down,0"));
 		assertNotNull("Message should be added to elevator when requested", elevator.getMessage());
 		elevator.processMessage();
 		assertNull("Should remove message instance from elevator when processed", elevator.getMessage());
 		assertTrue("Processed elevator message ready to be sent to scheduler", eleSys.getOutBoundMessagesStored() == 1);
+	}
+	
+	/**
+	 * Test the Elevator state transition
+	 */
+	void elevatorStateTransitionTest() {
+		ElevatorStateMachine state = new ElevatorStateMachine();
+		assertTrue("Processed elevator message ready to be sent to scheduler", ElevatorState.IDLE == state.getCurrentState());
+		state.onNext(Transition.RECEIVEDMESSAGE_DOWN);
+		assertTrue("Elevator state should change to MOVINGDOWN", ElevatorState.MOVINGDOWN == state.getCurrentState());
+		state.onNext(Transition.REACHEDDESTINATION);
+		assertTrue("Elevator state should change to DOOROPEN", ElevatorState.DOOROPEN == state.getCurrentState());
+		state.onNext(Transition.LOAD);
+		assertTrue("Elevator state should change to DOORCLOSE", ElevatorState.DOORCLOSE == state.getCurrentState());
+		
 	}
 	
 	/**
@@ -70,5 +87,6 @@ class ElevatorTest {
 		elevatorTest();
 		elevatorSystemTest();
 		elevatorMessageSystemInteraction();
+		elevatorStateTransitionTest();
 	}
 }
