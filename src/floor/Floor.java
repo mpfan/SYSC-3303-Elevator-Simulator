@@ -7,7 +7,7 @@ import common.*;
 import scheduler.Scheduler;
 
 /**
- * Class to represesent a floor
+ * Class to represent a floor
  *
  * @author Christophe Tran, Hoang Bui
  */
@@ -70,8 +70,20 @@ public class Floor implements Runnable {
 			timeStamps.add(System.currentTimeMillis() + (long) 100 * messages.size());
 		}
 		
-		msg = new Message(MessageType.FLOOR,messages.get(0));
-		messages.remove(0);
+		
+		Thread messageSending = new Thread(new Runnable() {
+			public void run() {
+				for(String m : messages) {
+					System.out.println("Floor: there are still more inputs");
+					System.out.println("Floor: addding message to outbound: " + m);
+					floorSystem.addOutBoundMessage(new Message(MessageType.FLOOR, m));
+				}
+				messages.clear();
+			}
+		});
+		
+		messageSending.start();
+		
 		while(true) {
 			processMessage();
 		}
@@ -90,25 +102,21 @@ public class Floor implements Runnable {
 			}
 		}
 		
-		//Check if message type is floor
-		if(msg.getType().equals(MessageType.FLOOR)) {
-			System.out.println("Floor: Processing message on floor...");
-			System.out.println("Floor: " + msg.getBody());
-			this.floorSystem.addOutBoundMessage(msg);
-			this.msg = null;
-		}
-		else { //Message type is elevator
-			System.out.println("Floor: Processing message received from elevator...");
-			System.out.println("Floor: " + msg.getBody());
-			if(messages.size() > 0){ //Check if there are still more inputs
-				this.msg = new Message(MessageType.FLOOR,messages.get(0));
-				messages.remove(0);
-			}
-			else {
-				this.msg = null;
-			}
-		}
+		System.out.println("Floor: Processing message received from elevator...");
+		System.out.println("Floor: " + msg.getBody());
+		
+		this.floorSystem.addOutBoundMessage(msg);
+		
+		this.msg = null;
+		
+
 		notifyAll();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -209,5 +217,5 @@ public class Floor implements Runnable {
 	public ArrayList<String> getMessages() {
 		return messages;
 	}
-	
+
 }

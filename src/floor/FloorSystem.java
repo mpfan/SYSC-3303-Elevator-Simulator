@@ -1,11 +1,17 @@
 package floor;
 
-import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
+import common.ElevatorMessage;
+import common.ElevatorState;
+import common.FloorMessage;
 import common.Message;
+import common.MessageListener;
 import common.MessageType;
-import scheduler.Scheduler;
+import common.Messenger;
+import common.Ports;
 
 /**
  * The FloorSystem class is responsible for handling communication between the Scheduler and Floor.
@@ -13,23 +19,21 @@ import scheduler.Scheduler;
  * @author Christophe Tran, Hoang Bui
  *
  */
-public class FloorSystem implements Runnable {
+public class FloorSystem implements Runnable, MessageListener {
 	
 	// Variables
-	private Scheduler scheduler; 
+	private Messenger messenger; 
 	private List<Floor> floors;
 	private Queue<Message> inBoundRequests, outBoundRequests;
 	
 	/**
 	* Constructor for the floor system
-	*
-	* @param scheduler the scheduler
-	* @param numElev the number of elevators
-	* @param inputFile the input file
+	 * @param numElev the number of elevators
+	 * @param inputFile the input file
 	*/
-	public FloorSystem(Scheduler scheduler, int numElev) {
+	public FloorSystem(int numElev) {
 		//set-up variables
-		this.scheduler = scheduler;
+		messenger = Messenger.getMessenger();
 		floors = new ArrayList<Floor>();
 		outBoundRequests = new LinkedList<Message>();
 		inBoundRequests = new LinkedList<Message>();
@@ -78,6 +82,13 @@ public class FloorSystem implements Runnable {
 	}
 	
 
+	public static void main(String[] args) {
+		
+		FloorSystem floorSys = new FloorSystem(1);
+		Thread floorSystemThread = new Thread(floorSys, "Floor System");
+		floorSystemThread.start();
+	}
+	
 	@Override
 	public void run() {
 		
@@ -96,9 +107,62 @@ public class FloorSystem implements Runnable {
 							}
 						}
 						
+						Message msg = outBoundRequests.poll();
+						
+						Message toSend;
+						ElevatorState state = ElevatorState.ILLEGAL;
+						ElevatorMessage eleMessage = null;
+						
+						
+						try {
+							eleMessage = new ElevatorMessage(msg);
+							state = eleMessage.getState();
+							
+							toSend = eleMessage.toMessage();
+
+						} catch (IllegalArgumentException e) {
+							
+							FloorMessage floorMessage = new FloorMessage(msg);
+							toSend = floorMessage.toMessage();
+						}
+
 						System.out.println("Floor System: Sending outbound messages to scheduler");
-						scheduler.request(outBoundRequests.poll());
+						try {
+							switch(state) {
+							case DOOROPEN:
+								
+								Calendar cal = Calendar.getInstance();
+								int hh = cal.get(Calendar.HOUR_OF_DAY);
+								int mm = cal.get(Calendar.MINUTE);
+								int ss = cal.get(Calendar.SECOND);
+								int ms = cal.get(Calendar.MILLISECOND);
+
+								FloorMessage floorMessage = new FloorMessage(hh + ":" + mm + ":" + ss + ":" + ms, "FINISHED_LOAD", eleMessage.getCurrentFloor(), eleMessage.getElevatorNum());
+								
+								System.out.println("FloorSystem: about to send: " + floorMessage.toMessage().getBody());
+								
+								messenger.send(floorMessage.toMessage(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
+								break;
+							case DOORCLOSE:
+								break;
+							default:
+								System.out.println("FloorSystem: about to send: " + toSend.getBody());
+
+								messenger.send(toSend, Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
+							}
+							
+						} catch (UnknownHostException e) {
+
+							e.printStackTrace();
+						}
 						outBoundRequests.notifyAll();
+					}
+					
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
@@ -106,31 +170,8 @@ public class FloorSystem implements Runnable {
 		
 		outBoundThread.start();
 		
-		// Thread for receiving in-bound messages from scheduler
-		Thread inBoundThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while(true) {
-					while (!inBoundRequests.isEmpty()) {
-						while (!inBoundRequests.isEmpty()) {
-							System.out.println("Floor System: Sending messages to floor");
-							//Currently a hard coded value, but will be updated in future iterations
-							floors.get(0).request(inBoundRequests.poll());
-						}
-					}
-					
-					System.out.println("Floor System: Requesting messages from scheduler");
-					Queue<Message> floorMessages = scheduler.response(MessageType.FLOOR);
-					
-					if (floorMessages != null) {						
-						inBoundRequests.addAll(floorMessages);
-						System.out.println("Floor System: Received " + Integer.toString(floorMessages.size()) + " messages");
-					}
-				}	
-			}
-		});
-		inBoundThread.start();
+		messenger.receive(Ports.FLOOR_PORT, this);
+		
 	}
 	
 	/**
@@ -163,5 +204,30 @@ public class FloorSystem implements Runnable {
 	public Queue<Message> getInBoundRequests(){
 		return inBoundRequests;
 	}
- 
+
+	@Override
+	public void onMessageReceived(Message message) {
+		// Thread for receiving in-bound messages from scheduler
+		Thread inBoundThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				
+					
+//					while (!inBoundRequests.isEmpty()) {
+//						System.out.println("Floor System: Sending messages to floor");
+//						//Currently a hard coded value, but will be updated in future iterations
+//						floors.get(0).request(message);
+//					}
+					
+//					System.out.println("Floor System: Requesting messages from scheduler");
+					
+//					inBoundRequests.add(message);
+					floors.get(0).request(message);
+					System.out.println("Floor System: Received: " + message.getBody());
+				}	
+			
+		});
+		inBoundThread.start();
+	}
 }

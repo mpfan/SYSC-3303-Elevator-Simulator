@@ -1,9 +1,22 @@
 package scheduler;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Iterator;
 
+import common.ElevatorMessage;
+import common.ElevatorState;
+import common.FloorMessage;
 import common.Message;
+import common.MessageListener;
 import common.MessageType;
+import common.Messenger;
+import common.Ports;
+import common.SchedulerState;
+import common.SchedulerState.Transition;
 
 /**
  * This class represents a Scheduler. Scheduler will try to schedule 
@@ -12,80 +25,22 @@ import common.MessageType;
  * @author Michael Fan
  *
  */
-public class Scheduler implements Runnable {
-	
-	//Variables
+public class Scheduler implements Runnable, MessageListener {
+
+	private SchedulerStateMachine stateMachine;
+	private Messenger messenger;
 	private Queue<Message> messages;
-	private Queue<Message> elevatorMessages;
-	private Queue<Message> floorMessages;
+	private Map<Integer, ElevatorModel> elevatorModel;
 	
 	/**
 	 * Constructor for scheduler
 	 */
 	public Scheduler() {
 		messages = new LinkedList<Message>();
-		elevatorMessages = new LinkedList<Message>();
-		floorMessages = new LinkedList<Message>();
-	}
-	
-	/**
-	 * Write a message into the message queue. The client will call
-	 * this method to write a message into the queue.
-	 * 
-	 * @param message the client's message
-	 */
-	public void request(Message message) {
-		System.out.println("Scheduler: Message received from " + message.getType());
-		System.out.println("Scheduler: Message is: " + message.getBody());
-
-		synchronized (messages) {
-			messages.add(message);
-			messages.notifyAll();
-		}
-	}
-	
-	/**
-	 * Return messages of the specified type.
-	 * 
-	 * @param messageType the type of the message to return
-	 * @return a list of messages
-	 */
-	public Queue<Message> response(MessageType messageType) {
-		Queue<Message> messages = null;
+		elevatorModel = new HashMap<Integer, ElevatorModel>();
 		
-		if(messageType == MessageType.ELEVATOR) {
-			synchronized (elevatorMessages) {
-				while(elevatorMessages.isEmpty()) {
-					try {
-						elevatorMessages.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
-				}
-				
-				messages = new LinkedList<Message>(elevatorMessages);
-				elevatorMessages.clear();
-				
-				elevatorMessages.notifyAll();
-			}
-		} else if(messageType == MessageType.FLOOR) {
-			synchronized (floorMessages) {
-				while(floorMessages.isEmpty()) {
-					try {
-						floorMessages.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
-				}
-				
-				messages = new LinkedList<Message>(floorMessages);
-				floorMessages.clear();
-				
-				floorMessages.notifyAll();
-			}
-		}
-		
-		return messages;
+		messenger = Messenger.getMessenger();
+		stateMachine = new SchedulerStateMachine();
 	}
 	
 	/**
@@ -93,51 +48,160 @@ public class Scheduler implements Runnable {
 	 * is no requests.
 	 */
 	public void run() {
+		messenger.receive(Ports.SCHEDULER_PORT, this);
+		System.out.println("Scheduler listening on " + Ports.SCHEDULER_PORT);
+			
 		while(true) {
 			synchronized (messages) {
-				while(messages.isEmpty()) {
+				while(stateMachine.getCurrentState() == SchedulerState.IDLE) {
+					System.out.println("Scheduler: Current state is " + stateMachine.getCurrentState());
 					try {
 						messages.wait();
-					} catch (Exception e) {
-						
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
+					System.out.println("Scheduler: Current state is " + stateMachine.getCurrentState());
 				}
 				
+				System.out.println("Scheduler: Scheduling...");
 				schedule();
-				
-				synchronized(elevatorMessages) {
-					elevatorMessages.notifyAll();
-				}
-				synchronized(floorMessages) {
-					floorMessages.notifyAll();
-				}
-				
+				System.out.println("Scheduler: Done scheduling");
+				stateMachine.onNext(SchedulerState.Transition.FINISHED_SCHEDULING);
 			}
+			
+			
 		}
 	}
 	
 	/**
-	 * Schedule based on the messages. For now it will simply relay messages
-	 * between Elevator System and Floor System without any scheduling.
+	 * Action performed when a message has been received.
+	 * 
+	 * @param message the message that has been received
 	 */
-	private void schedule() {
-		synchronized (messages) {
-			for(int i = 0; i < messages.size(); i++) {
-				Message m = messages.remove();
-				switch (m.getType()) {
-					case ELEVATOR: 
-						synchronized (floorMessages) {
-							floorMessages.add(m);
+	@Override
+	public void onMessageReceived(Message message) {
+		System.out.println("Scheduler: Received message: " + message.getType() + " " + message.getBody());
+		Thread messageWriter = new Thread(new Runnable() {
+			public void run() {
+				synchronized (messages) {
+					while(stateMachine.getCurrentState() == SchedulerState.BUSY) {
+						try {
+							messages.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						break;
-					case FLOOR:
-						synchronized (elevatorMessages) {
-							elevatorMessages.add(m);
-						}
-					default:
-					// Should never reach here
+					}
+					
+					
+					messages.add(message);
+					stateMachine.onNext(Transition.RECEIVED_MESSAGE);
+					messages.notifyAll();
 				}
 			}
+		});
+		
+		messageWriter.start();
+	}
+	
+	/**
+	 * Schedule based on the messages.
+	 */
+	private void schedule() {
+		// Handle scheduling
+		Iterator<Message> msgIter = messages.iterator();
+		while(msgIter.hasNext()) {
+			Message msg = msgIter.next();
+			
+			if(msg.getType() == MessageType.ELEVATOR) {
+				// The message might have three meaning
+				ElevatorMessage em = new ElevatorMessage(msg);
+				ElevatorModel elevator = null;
+				if(!elevatorModel.containsKey(em.getElevatorNum())) {
+					elevator = new ElevatorModel(em.getElevatorNum(), em.getState(), em.getCurrentFloor());
+					elevatorModel.put(em.getElevatorNum(), elevator);
+				} else {
+					// Update the corresponding elevator state
+					elevator = elevatorModel.get(em.getElevatorNum());
+					elevator.setCurrentFloor(em.getCurrentFloor());
+					elevator.setState(em.getState());
+				}
+				
+				// Tell floor to open door
+				if(elevator.getState() == ElevatorState.DOOROPEN) {
+					try {
+						messenger.send(em.toMessage(), Ports.FLOOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				} else if (elevator.getState() == ElevatorState.DOORCLOSE) { // Tell floor to close door
+					try {
+						messenger.send(em.toMessage(), Ports.FLOOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			} else if(msg.getType() == MessageType.FLOOR) {
+				FloorMessage fm = new FloorMessage(msg);
+								
+				if (!elevatorModel.containsKey(fm.getEleNum())) {
+					try {
+						messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+					continue;
+				}
+				
+				// Retrieve the corresponding the elevator model
+				ElevatorModel elevator = elevatorModel.get(fm.getEleNum());
+				
+				if(fm.getDirection().equalsIgnoreCase("up")) {
+					// Elevator is on the way up and is able to pick up this floor
+					if(elevator.getState() == ElevatorState.MOVINGUP && elevator.getCurrentFloor() < fm.getFloorNum()) {
+						try {
+							messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+						} catch (UnknownHostException e) {
+							e.printStackTrace();
+						}
+					} else {
+						elevator.getUpQueue().add(fm);
+					}
+				} else if (fm.getDirection().equalsIgnoreCase("down")) {
+					// Elevator is on the way down and is able to pick up this floor
+					if(elevator.getState() == ElevatorState.MOVINGDOWN && elevator.getCurrentFloor() > fm.getFloorNum()) {
+						try {
+							messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+						} catch (UnknownHostException e) {
+							e.printStackTrace();
+						}
+					} else {
+						elevator.getDownQueue().add(fm);
+					}
+				} else if (fm.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
+					try {
+						messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				}
+			}	
 		}
+		if (!messages.isEmpty()) {
+			messages.remove();
+		}
+	}
+	
+	/**
+	 * @return the messages queue
+	 */
+	public Queue<Message> getMessages() {
+		return messages;
+	}
+	
+	public static void main(String[] args) {
+		Thread scheduler = new Thread(new Scheduler());
+		
+		scheduler.start();
 	}
 }
