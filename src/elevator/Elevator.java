@@ -72,21 +72,17 @@ public class Elevator implements Runnable {
 				while (true) {
 
 					ElevatorState currentState = state.getCurrentState();
-					
 					Transition transition = getElevatorDirection();
 					
 					if (currentState == ElevatorState.DOORCLOSE) {
-						if (mode.canMoveToFloor(currFloor, currDest, currentState)) {
-							transition = mode == ElevatorMode.UP ? Transition.PRESS_UP : Transition.PRESS_DOWN;
-						}
-					}
-
-					if (transition != null) {
+						currDest = -1;
+						state.onNext(Transition.REACHEDDESTINATION);
+					} else if (transition != null) {
 						state.onNext(transition);
 					}
 					
 					ElevatorState nextState = state.getCurrentState();
-
+					
 					if (state.getCurrentState() == ElevatorState.MOVINGDOWN) {
 						currFloor--;
 					} else if (state.getCurrentState() == ElevatorState.MOVINGUP) {
@@ -163,8 +159,6 @@ public class Elevator implements Runnable {
 		
 		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
 			this.state.onNext(Transition.LOAD);
-		} else if (state.getCurrentState() == ElevatorState.IDLE) {
-			this.state.onNext(getElevatorDirection());
 		}
 
 		System.out.println("New state: " + this.state.getCurrentState());
@@ -344,15 +338,10 @@ public class Elevator implements Runnable {
 		FloorMessage msg = new FloorMessage(message);
 		Integer newDest = new Integer(msg.getFloorNum());
 
-//		if (!destinations.isEmpty()) {
-//			if (mode == ElevatorMode.DOWN && newDest > currDest) {
-//				currDest = newDest;
-//			} 
-//		} else {
-//			currDest = newDest;
-//		}
-		currDest = newDest;
-		addDestination(newDest);
+		if(state.getCurrentState() != ElevatorState.DOOROPEN && state.getCurrentState() != ElevatorState.DOORCLOSE) {
+			currDest = newDest;
+			addDestination(newDest);
+		}
 
 		return msg;
 	}
