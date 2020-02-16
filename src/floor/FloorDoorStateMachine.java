@@ -29,7 +29,7 @@ public class FloorDoorStateMachine {
 	 * @param transition The transition to the next state
 	 */
 	public void onNext(Transition transition) {
-		this.state.next(transition);
+		this.state = this.state.next(transition);
 	}
 
 	/**
