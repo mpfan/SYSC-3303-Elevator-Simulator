@@ -54,15 +54,18 @@ public class Scheduler implements Runnable, MessageListener {
 		while(true) {
 			synchronized (messages) {
 				while(stateMachine.getCurrentState() == SchedulerState.IDLE) {
+					System.out.println("Scheduler: Current state is " + stateMachine.getCurrentState());
 					try {
 						messages.wait();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					System.out.println("Scheduler: Current state is " + stateMachine.getCurrentState());
 				}
 				
-				stateMachine.onNext(SchedulerState.Transition.RECEIVED_MESSAGE);
+				System.out.println("Scheduler: Scheduling...");
 				schedule();
+				System.out.println("Scheduler: Done scheduling");
 				stateMachine.onNext(SchedulerState.Transition.FINISHED_SCHEDULING);
 			}
 			
