@@ -7,7 +7,7 @@ import common.*;
 import scheduler.Scheduler;
 
 /**
- * Class to represesent a floor
+ * Class to represent a floor
  *
  * @author Christophe Tran, Hoang Bui
  */

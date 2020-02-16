@@ -4,7 +4,6 @@ package common;
  * Method used to receive a message from the Messenger.
  * 
  * @author Michael Fan 101029934
- *
  */
 public interface MessageListener {
 	/**

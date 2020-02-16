@@ -8,6 +8,7 @@ import common.FloorDoorState.Transition;
 
 /**
  * A class for the floor door's state machine
+ * Currently not used, will be used in future iteration
  * 
  * @author Hoang Bui
  */

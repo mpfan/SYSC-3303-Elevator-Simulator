@@ -11,7 +11,7 @@ import common.ElevatorState;
  * An internal model used to store information about an 
  * information. Used by the scheduler.
  * 
- * @author Michael Fan
+ * @author Michael Fan, Hoang Bui
  *
  */
 public class ElevatorModel {
@@ -61,20 +61,26 @@ public class ElevatorModel {
 	}
 	
 	/**
-	 * @return the elevatorNum
+	 * Method to obtain the elevator number
+	 * 
+	 * @return elevatorNum the elevator number
 	 */
 	public int getElevatorNum() {
 		return elevatorNum;
 	}
 
 	/**
-	 * @return the state
+	 * Method to obtain the state
+	 * 
+	 * @return state the state
 	 */
 	public ElevatorState getState() {
 		return state;
 	}
 	
 	/**
+	 * Method to set the state
+	 * 
 	 * @param state the state to set
 	 */
 	public void setState(ElevatorState state) {
@@ -82,28 +88,36 @@ public class ElevatorModel {
 	}
 
 	/**
-	 * @return the upQueue
+	 * Method to obtain the queue with floor messages that request to go up
+	 * 
+	 * @return upQueue the queue with floor messages that request to go up
 	 */
 	public Queue<FloorMessage> getUpQueue() {
 		return upQueue;
 	}
 
 	/**
-	 * @return the downQueue
+	 * Method to obtain the queue with floor messages that request to go down
+	 * 
+	 * @return downQueue the queue with floor messages that request to go down
 	 */
 	public Queue<FloorMessage> getDownQueue() {
 		return downQueue;
 	}
 	
 	/**
-	 * @return the currentFloor
+	 * Method to obtain the current floor
+	 * 
+	 * @return currentFloor the current floor
 	 */
 	public int getCurrentFloor() {
 		return currentFloor;
 	}
 
 	/**
-	 * @param currentFloor the currentFloor to set
+	 * Method to set the current floor
+	 * 
+	 * @param currentFloor the current floor to set
 	 */
 	public void setCurrentFloor(int currentFloor) {
 		this.currentFloor = currentFloor;
