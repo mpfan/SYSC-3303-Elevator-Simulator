@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 /**
- * test class for CLasee Messenger
+ * Test class for Messenger
  * 
  * @author Michael Fan, Hoang Bui
  */
