@@ -130,6 +130,12 @@ public class Scheduler implements Runnable, MessageListener {
 					} catch (UnknownHostException e) {
 						e.printStackTrace();
 					}
+				} else if (elevator.getState() == ElevatorState.DOORCLOSE) { // Tell floor to close door
+					try {
+						messenger.send(em.toMessage(), Ports.FLOOR_PORT, InetAddress.getLocalHost());
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
 				}
 				
 			} else if(msg.getType() == MessageType.FLOOR) {
@@ -170,14 +176,16 @@ public class Scheduler implements Runnable, MessageListener {
 						elevator.getDownQueue().add(fm);
 					}
 				} else if (fm.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
-					System.out.println("Scheduler: FINISHED_LOAD");
 					try {
 						messenger.send(fm.toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
 					} catch (UnknownHostException e) {
 						e.printStackTrace();
 					}
 				}
-			}
+			}	
+		}
+		if (!messages.isEmpty()) {
+			messages.remove();
 		}
 	}
 	

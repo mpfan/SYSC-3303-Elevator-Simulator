@@ -1,9 +1,6 @@
 package elevator;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Calendar;
 
 import common.FloorMessage;
@@ -71,40 +68,57 @@ public class Elevator implements Runnable {
 
 			@Override
 			public void run() {
-				
-				while(true) {
-					
+
+				while (true) {
+
+					ElevatorState currentState = state.getCurrentState();
 					Transition transition = getElevatorDirection();
-					if (transition != null) {
+					
+					if (currentState == ElevatorState.DOORCLOSE) {
+						currDest = -1;
+						state.onNext(Transition.REACHEDDESTINATION);
+					} else if (transition != null) {
 						state.onNext(transition);
 					}
 					
+					ElevatorState nextState = state.getCurrentState();
 					
 					if (state.getCurrentState() == ElevatorState.MOVINGDOWN) {
 						currFloor--;
-					}
-					else if(state.getCurrentState() == ElevatorState.MOVINGUP) {
+					} else if (state.getCurrentState() == ElevatorState.MOVINGUP) {
 						currFloor++;
 					}
-					else if(state.getCurrentState() == ElevatorState.DOOROPEN) {
+
+					if (state.getCurrentState() == ElevatorState.DOOROPEN) {
 						door = true;
-					}
-					else if(state.getCurrentState() == ElevatorState.DOORCLOSE) {
+					} else if (state.getCurrentState() == ElevatorState.DOORCLOSE) {
 						door = false;
 					}
+
+					if (currentState == nextState && (currentState == ElevatorState.IDLE
+							|| currentState == ElevatorState.DOOROPEN || currentState == ElevatorState.DOORCLOSE)) {
+						
+						try {
+							Thread.sleep(4700); // this is the amount of time it takes for the Elevator to move across floors
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						continue;
+					}
 					
-					if(state.getCurrentState() != ElevatorState.IDLE) {
+					
+					if (state.getCurrentState() != ElevatorState.IDLE) {
 						createEleMsg();
 						eleSys.addOutboundMessage(eleMsg);
 					}
 
 					try {
-						Thread.sleep(4700);
+						Thread.sleep(4700); // this is the amount of time it takes for the Elevator to move across floors
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-					
+
 			}
 		});
 		moveThread.start();
@@ -112,12 +126,6 @@ public class Elevator implements Runnable {
 		while (true) {
 
 			processMessage();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 
@@ -137,14 +145,22 @@ public class Elevator implements Runnable {
 
 		FloorMessage receivedMsg = loadFloorMessage(msg);
 
+		System.out.println("Elevator: message: " + receivedMsg.toMessage().getBody());
+
 		System.out.println("Current state: " + this.state.getCurrentState());
 
-		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
-			this.state.onNext(Transition.LOAD);
-		} else if (state.getCurrentState() == ElevatorState.IDLE) {
-			this.state.onNext(getElevatorDirection());
+		System.out.println("Elevator message direction: " + receivedMsg.getDirection());
+
+		if (receivedMsg.getDirection().equalsIgnoreCase("UP")) {
+			this.mode = ElevatorMode.UP;
+		} else if (receivedMsg.getDirection().equalsIgnoreCase("DOWN")) {
+			this.mode = ElevatorMode.DOWN;
 		}
 		
+		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
+			this.state.onNext(Transition.LOAD);
+		}
+
 		System.out.println("New state: " + this.state.getCurrentState());
 
 		createEleMsg(); // create new elevator message
@@ -179,22 +195,22 @@ public class Elevator implements Runnable {
 	 * @param targetFloor the floor number for elevator to travel to
 	 */
 	public boolean pressButton(int targetFloor) {
-		
+
 		if (targetFloor >= buttonPressed.length || targetFloor < 0) {
 			return false; // if the floor number is invalid, immediately return
 		}
-		
+
 		if (this.mode.canMoveToFloor(currFloor, targetFloor, this.state.getCurrentState())) {
-			synchronized(destinations) {
+			synchronized (destinations) {
 				this.destinations.add(targetFloor);
 			}
-			
+
 			return true;
 		} else if (this.state.getCurrentState() == ElevatorState.IDLE) {
-			
-			synchronized(destinations) {
+
+			synchronized (destinations) {
 				this.destinations.add(targetFloor);
-				
+
 				if (targetFloor > currFloor) {
 					this.mode = ElevatorMode.UP;
 					this.state.onNext(Transition.PRESS_UP);
@@ -202,14 +218,14 @@ public class Elevator implements Runnable {
 					this.mode = ElevatorMode.DOWN;
 					this.state.onNext(Transition.PRESS_DOWN);
 				}
-				
+
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Get the message currently stored in elevator
 	 * 
@@ -311,7 +327,7 @@ public class Elevator implements Runnable {
 	 */
 	public void addDestination(Integer destination) {
 		this.destinations.add(destination);
-  }
+	}
 
 	/**
 	 * sets the elevator's destination from the floor message
@@ -322,16 +338,11 @@ public class Elevator implements Runnable {
 		FloorMessage msg = new FloorMessage(message);
 		Integer newDest = new Integer(msg.getFloorNum());
 
-//		if (!destinations.isEmpty()) {
-//			if (mode == ElevatorMode.DOWN && newDest > currDest) {
-//				currDest = newDest;
-//			} 
-//		} else {
-//			currDest = newDest;
-//		}
-		currDest = newDest;
-		addDestination(newDest);
-		
+		if(state.getCurrentState() != ElevatorState.DOOROPEN && state.getCurrentState() != ElevatorState.DOORCLOSE) {
+			currDest = newDest;
+			addDestination(newDest);
+		}
+
 		return msg;
 	}
 
@@ -343,11 +354,11 @@ public class Elevator implements Runnable {
 	 */
 	public Transition getElevatorDirection() {
 		Transition direction;
-		
+
 		if (currDest < 0) {
 			return null;
 		}
-		
+
 		if (currFloor > currDest) {
 			direction = Transition.RECEIVEDMESSAGE_DOWN;
 		} else if (currFloor < currDest) {
@@ -371,8 +382,8 @@ public class Elevator implements Runnable {
 		int ss = cal.get(Calendar.SECOND);
 		int ms = cal.get(Calendar.MILLISECOND);
 
-		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + "," + currDest + ","
-				+ elevatorNumber;
+		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + ","
+				+ currDest + "," + elevatorNumber;
 
 		eleMsg = new Message(MessageType.ELEVATOR, body);
 		return eleMsg;

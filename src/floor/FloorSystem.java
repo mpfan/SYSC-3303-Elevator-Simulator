@@ -118,7 +118,6 @@ public class FloorSystem implements Runnable, MessageListener {
 							eleMessage = new ElevatorMessage(msg);
 							state = eleMessage.getState();
 							
-							System.out.println("Floor System: changed state to: " + state);
 							toSend = eleMessage.toMessage();
 
 						} catch (IllegalArgumentException e) {
@@ -126,7 +125,6 @@ public class FloorSystem implements Runnable, MessageListener {
 							FloorMessage floorMessage = new FloorMessage(msg);
 							toSend = floorMessage.toMessage();
 						}
-						System.out.println("Floor System: state: " + state);
 
 						System.out.println("Floor System: Sending outbound messages to scheduler");
 						try {
@@ -141,9 +139,11 @@ public class FloorSystem implements Runnable, MessageListener {
 
 								FloorMessage floorMessage = new FloorMessage(hh + ":" + mm + ":" + ss + ":" + ms, "FINISHED_LOAD", eleMessage.getCurrentFloor(), eleMessage.getElevatorNum());
 								
-								System.out.println("FloorSystem: about to send: " + floorMessage.toMessage());
+								System.out.println("FloorSystem: about to send: " + floorMessage.toMessage().getBody());
 								
 								messenger.send(floorMessage.toMessage(), Ports.SCHEDULER_PORT, InetAddress.getLocalHost());
+								break;
+							case DOORCLOSE:
 								break;
 							default:
 								System.out.println("FloorSystem: about to send: " + toSend.getBody());
