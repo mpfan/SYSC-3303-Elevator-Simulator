@@ -27,7 +27,7 @@ public class Elevator implements Runnable {
 	private boolean door;
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
-	private Message msg, eleMsg;
+	private Message msg;
 
 	private HashSet<Integer> destinations;
 
@@ -72,8 +72,11 @@ public class Elevator implements Runnable {
 				while (true) {
 
 					ElevatorState currentState = state.getCurrentState();
+					System.out.println("MoveThread: " + currentState);
+
 					Transition transition = getElevatorDirection();
-					
+					System.out.println("MoveThread: elevator mode: " + mode);
+
 					if (currentState == ElevatorState.DOORCLOSE) {
 						currDest = -1;
 						state.onNext(Transition.REACHEDDESTINATION);
@@ -108,7 +111,7 @@ public class Elevator implements Runnable {
 					
 					
 					if (state.getCurrentState() != ElevatorState.IDLE) {
-						createEleMsg();
+						Message eleMsg = createEleMsg();
 						eleSys.addOutboundMessage(eleMsg);
 					}
 
@@ -156,15 +159,17 @@ public class Elevator implements Runnable {
 		} else if (receivedMsg.getDirection().equalsIgnoreCase("DOWN")) {
 			this.mode = ElevatorMode.DOWN;
 		}
-		
+
 		if (receivedMsg.getDirection().equalsIgnoreCase("FINISHED_LOAD")) {
 			this.state.onNext(Transition.LOAD);
 		}
 
 		System.out.println("New state: " + this.state.getCurrentState());
 
-		createEleMsg(); // create new elevator message
+		Message eleMsg = createEleMsg();
 		this.eleSys.addOutboundMessage(eleMsg); // send to system to send to scheduler
+
+//		createEleMsg(); // create new elevator message
 
 		this.msg = null;
 		notifyAll();
@@ -387,8 +392,7 @@ public class Elevator implements Runnable {
 		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + ","
 				+ currDest + "," + elevatorNumber;
 
-		eleMsg = new Message(MessageType.ELEVATOR, body);
-		return eleMsg;
+		return new Message(MessageType.ELEVATOR, body);
 	}
 
 }
