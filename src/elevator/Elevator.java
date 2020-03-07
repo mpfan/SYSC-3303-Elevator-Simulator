@@ -23,7 +23,7 @@ public class Elevator implements Runnable {
 	private int capacity;
 	private int people; //number of people inside the elevator
 	private int currFloor; // current floor
-	private int currDest; // current destination
+	private int initialDest; // the initial destination for elevator
 	private boolean door;
 	private boolean[] buttonPressed;
 	private ElevatorSystem eleSys;
@@ -53,7 +53,7 @@ public class Elevator implements Runnable {
 		this.state = new ElevatorStateMachine();
 		this.destinations = new HashSet<Integer>();
 		this.currFloor = currFloor;
-		this.currDest = -1;
+		this.initialDest = -1;
 		this.mode = ElevatorMode.IDLE;
 		this.msg = null;
 	}
@@ -358,7 +358,9 @@ public class Elevator implements Runnable {
 		Integer newDest = new Integer(msg.getFloorNum());
 
 		if(state.getCurrentState() != ElevatorState.DOOROPEN && state.getCurrentState() != ElevatorState.DOORCLOSE) {
-			currDest = newDest;
+			if (this.destinations.isEmpty()) { // only initial destiantion when elevator is idle/has no where to go
+				initialDest = newDest;
+			}
 			addDestination(newDest);
 		}
 
@@ -382,9 +384,14 @@ public class Elevator implements Runnable {
 		// if the elevator is at a destination
 		if (this.destinations.contains(currFloor)) {
 			direction = Transition.REACHEDDESTINATION;
+			initialDest = -1; // reset the initial starting elevator destination
 			synchronized(this.destinations) {
 				this.destinations.remove(currFloor);
 			}
+		} else if (initialDest > 0 && initialDest > currFloor) {
+			direction = Transition.RECEIVEDMESSAGE_UP;
+		} else if (initialDest > 0 && initialDest < currFloor) {
+			direction = Transition.RECEIVEDMESSAGE_DOWN;
 		} else if (this.mode == ElevatorMode.UP) { // elevator is suppose to go up
 			direction = Transition.RECEIVEDMESSAGE_UP;
 		} else if (this.mode == ElevatorMode.DOWN) { // elevator is suppose to go down
@@ -407,7 +414,7 @@ public class Elevator implements Runnable {
 		int ms = cal.get(Calendar.MILLISECOND);
 
 		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + ","
-				+ currDest + "," + elevatorNumber;
+				+ initialDest + "," + elevatorNumber;
 
 		return new Message(MessageType.ELEVATOR, body);
 	}
