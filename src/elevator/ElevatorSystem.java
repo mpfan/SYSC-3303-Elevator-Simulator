@@ -2,9 +2,11 @@ package elevator;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import common.FloorMessage;
 import common.Message;
 import common.MessageListener;
 import common.Messenger;
@@ -21,7 +23,10 @@ public class ElevatorSystem implements Runnable, MessageListener {
 	//Variables
 	private Messenger messenger;
 	private Elevator ele1;
+	private Elevator ele2;
+	private Elevator ele3;
 	private Queue<Message> inBoundRequests, outBoundRequests;
+	private ArrayList<Elevator> elevators;
 
 	/**
 	 * Constructor for the elevator system
@@ -33,14 +38,24 @@ public class ElevatorSystem implements Runnable, MessageListener {
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
 		this.ele1 = new Elevator(10, 0, this, 1);
+		this.ele2 = new Elevator(10, 1, this, 1);
+		this.ele3 = new Elevator(10, 2, this, 1);
+		this.elevators = new ArrayList<Elevator>();
 	}
 
 	/**
 	 * Start the elevators
 	 */
 	public void startElevators() {
+		elevators.add(ele1);
+		elevators.add(ele2);
+		elevators.add(ele3);
 		Thread eleThread = new Thread(this.ele1, "Elevator");
 		eleThread.start();
+		Thread ele2Thread = new Thread(this.ele2, "Elevator 2");
+		ele2Thread.start();
+		Thread ele3Thread = new Thread(this.ele3, "Elevator 3");
+		ele3Thread.start();
 	}
 	
 	public static void main(String[] args) {
@@ -147,8 +162,12 @@ public class ElevatorSystem implements Runnable, MessageListener {
 
 			@Override
 			public void run() {
-
-				ele1.request(message);
+				
+				FloorMessage floorMsg = new FloorMessage(message);
+				
+				int eleNumber = floorMsg.getEleNum();
+				
+				elevators.get(eleNumber).request(message);
 				System.out.println("Elevator System: Received: " + message.getBody());
 			}
 		});
