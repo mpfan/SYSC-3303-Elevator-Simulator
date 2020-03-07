@@ -2,9 +2,11 @@ package elevator;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import common.FloorMessage;
 import common.Message;
 import common.MessageListener;
 import common.Messenger;
@@ -20,32 +22,40 @@ public class ElevatorSystem implements Runnable, MessageListener {
 
 	//Variables
 	private Messenger messenger;
-	private Elevator ele1;
 	private Queue<Message> inBoundRequests, outBoundRequests;
+	private ArrayList<Elevator> elevators;
 
 	/**
 	 * Constructor for the elevator system
 	 * 
 	 * @param scheduler the scheduler
 	 */
-	public ElevatorSystem() {
+	public ElevatorSystem(int numberOfElevators) {
 		this.messenger = Messenger.getMessenger();
 		this.inBoundRequests = new LinkedList<Message>();
 		this.outBoundRequests = new LinkedList<Message>();
-		this.ele1 = new Elevator(10, 0, this, 1);
+		this.elevators = new ArrayList<Elevator>();
+		startElevators(numberOfElevators);
 	}
 
 	/**
 	 * Start the elevators
 	 */
-	public void startElevators() {
-		Thread eleThread = new Thread(this.ele1, "Elevator");
-		eleThread.start();
+	public void startElevators(int numberOfElevators) {
+		
+		for (int i = 0; i < numberOfElevators; i++) {
+			// Create elevator with current index as elevator number
+			Elevator ele = new Elevator(10, i, this, 1);
+			elevators.add(ele);
+			
+			Thread eleThread = new Thread(ele, "Elevator");
+			eleThread.start();
+		}
 	}
 	
 	public static void main(String[] args) {
 		
-		ElevatorSystem eleSys = new ElevatorSystem();
+		ElevatorSystem eleSys = new ElevatorSystem(3);
 		Thread elevatorSystemThread = new Thread(eleSys, "Elevator System");
 		elevatorSystemThread.start();
 	}
@@ -56,7 +66,6 @@ public class ElevatorSystem implements Runnable, MessageListener {
 	@Override
 	public void run() {
 
-		startElevators();
 		messenger.receive(Ports.ELEVATOR_PORT, this);
 		
 		// spawn another thread for sending out-bound messages
@@ -147,8 +156,12 @@ public class ElevatorSystem implements Runnable, MessageListener {
 
 			@Override
 			public void run() {
-
-				ele1.request(message);
+				
+				FloorMessage floorMsg = new FloorMessage(message);
+				
+				int eleNumber = floorMsg.getEleNum();
+				
+				elevators.get(eleNumber).request(message);
 				System.out.println("Elevator System: Received: " + message.getBody());
 			}
 		});

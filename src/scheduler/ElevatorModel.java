@@ -17,6 +17,7 @@ import common.ElevatorState;
 public class ElevatorModel {
 	private int elevatorNum;
 	private ElevatorState state;
+	private ElevatorState prevState;
 	private int currentFloor;
 
 	private Queue<FloorMessage> upQueue;
@@ -26,6 +27,7 @@ public class ElevatorModel {
 		this.elevatorNum = elevatorNum;
 		this.state = state;
 		this.currentFloor = currentFloor;
+		this.prevState = null;
 		
 		upQueue = new PriorityQueue<FloorMessage>(10, new Comparator<FloorMessage>() {
 
@@ -84,6 +86,9 @@ public class ElevatorModel {
 	 * @param state the state to set
 	 */
 	public void setState(ElevatorState state) {
+		if(this.state == ElevatorState.MOVINGUP || this.state == ElevatorState.MOVINGDOWN) {
+			this.prevState = state;
+		}
 		this.state = state;
 	}
 
@@ -121,5 +126,12 @@ public class ElevatorModel {
 	 */
 	public void setCurrentFloor(int currentFloor) {
 		this.currentFloor = currentFloor;
+	}
+	
+	/**
+	 * @return previous state of the elevator
+	 */
+	public ElevatorState getPrevState() {
+		return prevState;
 	}
 }

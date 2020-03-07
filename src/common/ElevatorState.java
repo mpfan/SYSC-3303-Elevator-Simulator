@@ -14,7 +14,7 @@ public enum ElevatorState {
 				return MOVINGUP;
 			} else if (transition == Transition.RECEIVEDMESSAGE_DOWN) { //Check if the elevator should move down
 				return MOVINGDOWN;
-			}else if (transition == Transition.REACHEDDESTINATION) { //Check if the elevator has reached their destination
+			} else if (transition == Transition.REACHEDDESTINATION) { //Check if the elevator has reached their destination
 				return DOOROPEN;
 			}
 			return ILLEGAL; //The current transition is invalid
@@ -58,9 +58,13 @@ public enum ElevatorState {
 				return MOVINGUP;
 			} else if (transition == Transition.PRESS_DOWN) { //Check if someone pressed down in the elevator
 				return MOVINGDOWN;
-			} else if (transition == Transition.REACHEDDESTINATION) { //Check  if the elevator has reached it's destination
+			} else if (transition == Transition.RECEIVEDMESSAGE_UP) { //Check if we need to pick up someone above the elevator
+				return MOVINGUP;
+			} else if (transition == Transition.RECEIVEDMESSAGE_DOWN) { //Check if we need to pick up someone below in the elevator
+				return MOVINGDOWN;
+			} else if (transition == Transition.REACHEDDESTINATION) { // if the elevator has no where else to go, then be idle
 				return IDLE;
-			} 
+			}
 			return ILLEGAL; //The current transition is invalid
 		}
 	},
