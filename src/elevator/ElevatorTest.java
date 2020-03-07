@@ -27,7 +27,7 @@ class ElevatorTest {
 	 * Method to run tests on the elevator system
 	 */
 	void elevatorSystemTest() {
-		ElevatorSystem elevatorSystem = new ElevatorSystem();
+		ElevatorSystem elevatorSystem = new ElevatorSystem(3);
 		assertTrue("Check if there is exactly one elevator in the system", elevatorSystem.getNumElevators() == 1);
 	}
 	
@@ -35,7 +35,7 @@ class ElevatorTest {
 	 * Method to run tests on the elevator class
 	 */
 	void elevatorTest() {
-		Elevator elevator = new Elevator(1, 1, new ElevatorSystem(),1);
+		Elevator elevator = new Elevator(1, 1, new ElevatorSystem(3),1);
 		assertTrue("Check that the elevator capacity is 19", elevator.getCapacity() == 19);
 		assertTrue("Check that there are 0 people in the elevator", elevator.getPeople() == 0);
 		assertFalse("Check that the elevator cannot fit 20 people", elevator.setPeople(20));
@@ -54,7 +54,7 @@ class ElevatorTest {
 	 */
 	void elevatorMessageSystemInteraction() {
 	
-		ElevatorSystem eleSys = new ElevatorSystem();
+		ElevatorSystem eleSys = new ElevatorSystem(3);
 		Elevator elevator = new Elevator(20, 2, eleSys, 1);
 		
 		elevator.request(new Message(MessageType.ELEVATOR, "10:22:11.0,1,Down,0"));

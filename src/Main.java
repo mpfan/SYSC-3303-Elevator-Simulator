@@ -23,7 +23,7 @@ public class Main {
 		
 		//Set up threads
 		schedulerThread = new Thread(scheduler, "scheduler");
-		eleSysThread = new Thread(new ElevatorSystem(), "eleSys");
+		eleSysThread = new Thread(new ElevatorSystem(3), "eleSys");
 		floorSysThread = new Thread(new FloorSystem(numElev), "floorSys");
 		
 		//Start the threads
