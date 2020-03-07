@@ -42,6 +42,7 @@ COMMON PACKAGE
  	- States for scheduler
 
 SCHEDULER PACKAGE
+
 - Scheduler.Java
 - Class used to coordinate elevators and floors
 - SchedulerTest.java
@@ -55,6 +56,7 @@ SCHEDULER PACKAGE
 	- Tests for scheduler state machine
 
 ELEVATOR PACKAGE
+
 Elevator.java
 - class used to represent an elevator class
 ElevatorMode.java
@@ -67,6 +69,7 @@ ElevatorTest.java
 - tests for the elevator system and elevator
 
 FLOOR PACKAGE
+
 Floor.java
 - class used to represent a floor
 FloorDoor.java
@@ -88,7 +91,8 @@ Run Scheduler.java
 Run ElevatorSystem.java
 Run FloorSystem.java
 
-Program will end when Elevator system reaches an IDLE state (no more messages to pass)
+Program will end when all the messages from the FloorSystem have been
+processed by the Elevators and the Elevators remain in an IDLE state.
 
 TESTING INSTRUCTIONS
 
@@ -102,21 +106,28 @@ SchedulerStateMachineTest.java
 
 BREAKDOWN OF RESPONSIBILITIES
 - Scheduler
--Michael Fan
--Derek Shao
--Hoang Bui
+	- Michael Fan
+	- Derek Shao
+	- Hoang Bui
 - Elevator System
--Everyone
+	- Everyone
 - Floor System
-   	-Christophe Tran
- 	-Hoang Bui
+   	- Christophe Tran
+ 	- Hoang Bui
 - Unit tests
--Everyone
+	- Everyone
 - UML Class Diagram
--Everyone
+	- Everyone
 - UML Sequence Diagram
--Everyone
+	- Everyone
 - UML State Diagram
--Everyone
+	- Everyone
 - README
-	-Everyone
+	- Everyone
+
+REFLECTION ON CONCURRENCY CONTROL AT SCHEDULER FROM ITERATION 2 TO ITERATION 3
+
+The concurrency control at scheduler had not changed from Iteration 2 to Iteration 3.
+This is because optimizing for concurrency had always been a goal in the previous iteration
+by having separate threads for sending/receiving messages to and from elevator/floor systems.
+This design had integrated seamlessly with the support of internet protocols.
