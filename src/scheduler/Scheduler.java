@@ -124,6 +124,23 @@ public class Scheduler implements Runnable, MessageListener {
 					elevator = elevatorModel.get(em.getElevatorNum());
 					elevator.setCurrentFloor(em.getCurrentFloor());
 					elevator.setState(em.getState());
+				} 
+				
+				// Give the elevator the queued messages
+				if(elevator.getState() == ElevatorState.IDLE) {
+					/* 
+					 * If the elevator went idle after moving up then it's time to pick up all the messengers that wants to go down. Else if
+					 * the elevator went idle after moving down then it's time to pick up all the messengers that wants to go up.
+					 * 
+					 */
+					Queue<FloorMessage> queue = elevator.getPrevState() == ElevatorState.MOVINGUP ? elevator.getDownQueue() : elevator.getUpQueue();
+					for(int i = 0; i < queue.size(); i++) {
+						try {
+							messenger.send(queue.poll().toMessage(), Ports.ELEVATOR_PORT, InetAddress.getLocalHost());
+						} catch (UnknownHostException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				
 				// Tell floor to open door
@@ -186,9 +203,7 @@ public class Scheduler implements Runnable, MessageListener {
 					}
 				}
 			}	
-		}
-		if (!messages.isEmpty()) {
-			messages.remove();
+			msgIter.remove();
 		}
 	}
 	
