@@ -87,7 +87,7 @@ public class ElevatorModel {
 	 */
 	public void setState(ElevatorState state) {
 		if(this.state == ElevatorState.MOVINGUP || this.state == ElevatorState.MOVINGDOWN) {
-			this.prevState = state;
+			this.prevState = this.state;
 		}
 		this.state = state;
 	}
