@@ -14,7 +14,6 @@ public class ElevatorMessage {
 
 	private int currentFloor;
 	private ElevatorState state;
-	private int destination;
 	private int elevatorNum;
 	
 	/**
@@ -38,8 +37,7 @@ public class ElevatorMessage {
 		time = mArr[0];
 		currentFloor = Integer.parseInt(mArr[1]);
 		state = ElevatorState.valueOf(mArr[2]);
-		destination = Integer.parseInt(mArr[3]);
-		elevatorNum = Integer.parseInt(mArr[4]);
+		elevatorNum = Integer.parseInt(mArr[3]);
 	}
 	
 	/**
@@ -70,15 +68,6 @@ public class ElevatorMessage {
 	}
 
 	/**
-	 * Method to obtain the destination of the elevator
-	 * 
-	 * @return destination the destination of the elevator
-	 */
-	public int getDestination() {
-		return destination;
-	}
-
-	/**
 	 * Method to obtain the elevator's number
 	 * 
 	 * @return elevatorNum the elevator's number
@@ -93,6 +82,6 @@ public class ElevatorMessage {
 	 * @return the content of message wrapped in a message object
 	 */
 	public Message toMessage() {
-		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + state + "," + destination + ","+ elevatorNum);
+		return new Message(MessageType.ELEVATOR, time + "," + currentFloor + "," + state + ","+ elevatorNum);
 	}
 }

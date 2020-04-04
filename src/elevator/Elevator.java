@@ -414,7 +414,7 @@ public class Elevator implements Runnable {
 		int ms = cal.get(Calendar.MILLISECOND);
 
 		String body = hh + ":" + mm + ":" + ss + ":" + ms + "," + currFloor + "," + state.getCurrentState() + ","
-				+ initialDest + "," + elevatorNumber;
+				 + elevatorNumber;
 
 		return new Message(MessageType.ELEVATOR, body);
 	}
